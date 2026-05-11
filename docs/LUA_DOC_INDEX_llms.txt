@@ -1,0 +1,167 @@
+# Lua CLI
+
+## Docs
+
+- [AI Agent Building Guide](https://docs.heylua.ai/ai-guide.md): Complete reference for AI Agents and AI Coding IDEs (Cursor, Windsurf, GitHub Copilot) to build, test, and deploy agents on the Lua platform
+- [Agents API](https://docs.heylua.ai/api/agents.md): Invoke another agent from within your skill, tool, job, webhook, or processor
+- [AI API](https://docs.heylua.ai/api/ai.md): Generate AI responses with custom context in your tools
+- [Baskets API](https://docs.heylua.ai/api/baskets.md): Shopping cart management for e-commerce
+- [CDN](https://docs.heylua.ai/api/cdn.md): Upload and retrieve files from the Lua CDN
+- [Data API](https://docs.heylua.ai/api/data.md): Custom data storage with semantic vector search
+- [Environment Utilities](https://docs.heylua.ai/api/environment.md): Secure environment variable management
+- [Jobs API](https://docs.heylua.ai/api/jobs.md): Dynamically create scheduled tasks from within your tools
+- [Lua API](https://docs.heylua.ai/api/lua.md): Access request-level runtime information in your code
+- [LuaAgent](https://docs.heylua.ai/api/luaagent.md): Unified agent configuration combining skills, webhooks, jobs, and processors
+- [DeviceClient API](https://docs.heylua.ai/api/luadeviceclient.md): Complete API reference for the @lua-ai-global/device-client package
+- [LuaJob](https://docs.heylua.ai/api/luajob.md): Pre-defined scheduled tasks that run automatically
+- [LuaMCPServer](https://docs.heylua.ai/api/luamcpserver.md): Connect external tools via Model Context Protocol (MCP) servers
+- [LuaSkill](https://docs.heylua.ai/api/luaskill.md): Collection of related tools that give your AI specific capabilities
+- [LuaTool](https://docs.heylua.ai/api/luatool.md): Interface for implementing individual AI tool functions
+- [LuaWebhook](https://docs.heylua.ai/api/luawebhook.md): HTTP endpoints for receiving external events and integrations
+- [Orders API](https://docs.heylua.ai/api/orders.md): Order creation and management
+- [API Overview](https://docs.heylua.ai/api/overview.md): Complete API reference for building Lua AI skills
+- [PostProcessor](https://docs.heylua.ai/api/postprocessor.md): Transform and format AI responses before sending to users
+- [PreProcessor](https://docs.heylua.ai/api/preprocessor.md): Filter and route messages before they reach your AI agent
+- [Products API](https://docs.heylua.ai/api/products.md): Manage e-commerce product catalog
+- [Templates API](https://docs.heylua.ai/api/templates.md): Send template messages programmatically
+- [User API](https://docs.heylua.ai/api/user.md): Persistent per-user storage for state, preferences, and custom data
+- [Changelog](https://docs.heylua.ai/changelog.md): Release notes and version history for lua-cli
+- [Admin Dashboard](https://docs.heylua.ai/channels/admin-dashboard.md): Visual channel management interface
+- [CLI Management](https://docs.heylua.ai/channels/cli-management.md): Manage channels via terminal
+- [Email](https://docs.heylua.ai/channels/email.md): Connect your agent to email for automated responses
+- [Facebook Messenger](https://docs.heylua.ai/channels/facebook-messenger.md): Connect your agent to Facebook Page messages
+- [HTTP API](https://docs.heylua.ai/channels/http-api.md): Consume your Lua agent directly via HTTP requests
+- [Instagram](https://docs.heylua.ai/channels/instagram.md): Connect your agent to Instagram Direct Messages
+- [Channels Overview](https://docs.heylua.ai/channels/introduction.md): Connect your agent to WhatsApp, Facebook, Email, Slack, and more
+- [Quick Testing Channels](https://docs.heylua.ai/channels/quick-testing.md): Test your agent on existing Lua channels without setup
+- [Slack](https://docs.heylua.ai/channels/slack.md): Connect your agent to Slack workspaces
+- [Website Chat Widget](https://docs.heylua.ai/channels/website-widget.md): Embed LuaPop chat widget on your website
+- [WhatsApp Business](https://docs.heylua.ai/channels/whatsapp.md): Connect your agent to WhatsApp Business API
+- [Analytics & Tracking](https://docs.heylua.ai/chat-widget/analytics.md): Track chat interactions and measure engagement
+- [Configuration Reference](https://docs.heylua.ai/chat-widget/configuration.md): Complete configuration options for LuaPop
+- [Events & Callbacks](https://docs.heylua.ai/chat-widget/events.md): Listen to chat widget events and interactions
+- [Examples & Use Cases](https://docs.heylua.ai/chat-widget/examples.md): Real-world implementation examples for different industries
+- [Framework Integration](https://docs.heylua.ai/chat-widget/frameworks.md): Integrate LuaPop with React, Vue, Angular, and more
+- [Installation](https://docs.heylua.ai/chat-widget/installation.md): Install LuaPop on your website or application
+- [LuaPop Chat Widget](https://docs.heylua.ai/chat-widget/introduction.md): Embeddable AI chat widget for your website
+- [Migration Guide](https://docs.heylua.ai/chat-widget/migration.md): Migrate from Intercom, Zendesk, Drift, and other chat widgets
+- [Quick Start](https://docs.heylua.ai/chat-widget/quick-start.md): Get LuaPop running on your website in 2 minutes
+- [Styling & Customization](https://docs.heylua.ai/chat-widget/styling.md): Customize LuaPop to match your brand perfectly
+- [Troubleshooting](https://docs.heylua.ai/chat-widget/troubleshooting.md): Common issues and solutions for LuaPop
+- [Voice Chat](https://docs.heylua.ai/chat-widget/voice-chat.md): Enable voice interactions in your chat widget
+- [Authentication](https://docs.heylua.ai/cli/authentication.md): Configure API key authentication for Lua CLI
+- [Channels Command](https://docs.heylua.ai/cli/channels-command.md): Manage agent communication channels
+- [Chat Command](https://docs.heylua.ai/cli/chat-command.md): Interactive command-line chat with your AI agent
+- [Environment Variables Command](https://docs.heylua.ai/cli/env-command.md): Manage environment variables for sandbox and production
+- [Features Command](https://docs.heylua.ai/cli/features-command.md): Manage agent capabilities and features
+- [Integrations Command](https://docs.heylua.ai/cli/integrations-command.md): Connect third-party integrations and set up event-driven triggers for your agent via Unified.to
+- [Logs Command](https://docs.heylua.ai/cli/logs-command.md): View and debug agent execution logs
+- [MCP Command](https://docs.heylua.ai/cli/mcp-command.md): Manage MCP servers for your agent
+- [Non-Interactive Mode](https://docs.heylua.ai/cli/non-interactive-mode.md): Automate CLI commands for AI IDEs, CI/CD pipelines, and scripting
+- [CLI Overview](https://docs.heylua.ai/cli/overview.md): Command-line interface for building and deploying AI agents
+- [Persona Command](https://docs.heylua.ai/cli/persona-command.md): Manage your AI agent's personality and behavior
+- [Production Command](https://docs.heylua.ai/cli/production-command.md): Centralized control center for production environment
+- [Resources Command](https://docs.heylua.ai/cli/resources-command.md): Manage your agent's knowledge base and reference materials
+- [Skill Management](https://docs.heylua.ai/cli/skill-management.md): Commands for creating, compiling, testing, and deploying skills
+- [Skills Command](https://docs.heylua.ai/cli/skills-command.md): View and manage skills in sandbox and production environments
+- [Sync Command](https://docs.heylua.ai/cli/sync-command.md): Detect and resolve drift between server state and local code
+- [Troubleshooting](https://docs.heylua.ai/cli/troubleshooting.md): Common issues and solutions for Lua CLI
+- [Utility Commands](https://docs.heylua.ai/cli/utility-commands.md): Quick access commands for admin interface and documentation
+- [Environment Variables](https://docs.heylua.ai/concepts/environment-variables.md): Managing configuration and secrets securely
+- [Platform APIs](https://docs.heylua.ai/concepts/platform-apis.md): Built-in APIs for common operations
+- [Skills & Tools](https://docs.heylua.ai/concepts/skills-and-tools.md): Understanding the core building blocks of Lua CLI
+- [Development Workflows](https://docs.heylua.ai/concepts/workflows.md): Best practices for developing, testing, and deploying skills
+- [Customer Support Agent](https://docs.heylua.ai/demos/customer-support.md): Support automation with Zendesk API + Lua vector search
+- [E-commerce Shopping Assistant](https://docs.heylua.ai/demos/ecommerce-assistant.md): Complete shopping experience using Lua Platform APIs
+- [Finance Operations Agent](https://docs.heylua.ai/demos/finance-operations.md): Banking operations with Plaid API
+- [Financial Services Onboarding](https://docs.heylua.ai/demos/financial-onboarding.md): KYC onboarding with document verification and compliance checks
+- [Healthcare Patient Portal](https://docs.heylua.ai/demos/healthcare-portal.md): Patient services with EMR API integration
+- [Hotel Booking Agent](https://docs.heylua.ai/demos/hotel-booking.md): Reservation management with Lua Data API
+- [HR Operations Assistant](https://docs.heylua.ai/demos/hr-assistant.md): Internal HR automation with BambooHR API + Lua Data
+- [IoT Security Camera](https://docs.heylua.ai/demos/iot-camera.md): Capture photos on-demand with Raspberry Pi Camera via chat
+- [IoT Door Access Control](https://docs.heylua.ai/demos/iot-door-assistant.md): WhatsApp-controlled door locks with Raspberry Pi for hotels and apartments
+- [IoT Greenhouse Climate Monitor](https://docs.heylua.ai/demos/iot-greenhouse.md): Read temperature, humidity, and pressure from BME280 sensor on Raspberry Pi
+- [IoT Smart Light Control](https://docs.heylua.ai/demos/iot-smart-light.md): Control GPIO relay/LED on Raspberry Pi via chat
+- [Logistics & Shipping Tracker](https://docs.heylua.ai/demos/logistics-tracker.md): Package tracking with UPS, FedEx, and USPS APIs
+- [Demo Gallery](https://docs.heylua.ai/demos/overview.md): 15 production-ready solutions showcasing Lua's flexibility across business and IoT
+- [Real Estate Assistant](https://docs.heylua.ai/demos/real-estate-assistant.md): Property search with MLS API + Lua vector search
+- [Restaurant Ordering System](https://docs.heylua.ai/demos/restaurant-ordering.md): Food ordering and reservations with Lua Platform APIs
+- [SaaS Onboarding Assistant](https://docs.heylua.ai/demos/saas-onboarding.md): User onboarding with custom API + Lua vector search
+- [How Devices Become Tools](https://docs.heylua.ai/devices/agent-tools.md): Understand how device commands automatically appear as tools your agent can use
+- [Build Your Own Client](https://docs.heylua.ai/devices/build-your-own.md): Full protocol specification for building a Lua device client in any language.
+- [CDN Uploads](https://docs.heylua.ai/devices/cdn-uploads.md): Upload and download files between your device and the Lua CDN
+- [CLI Commands](https://docs.heylua.ai/devices/cli-commands.md): Reference for all device-related CLI commands
+- [Factory Monitor](https://docs.heylua.ai/devices/examples/industrial-sensor.md): Monitor industrial equipment with MicroPython on a Raspberry Pi Pico W
+- [Mac Controller](https://docs.heylua.ai/devices/examples/mac-controller.md): Control your MacBook remotely through your AI agent
+- [Raspberry Pi Pico W Setup](https://docs.heylua.ai/devices/examples/raspberry-pi-pico.md): Step-by-step guide to running a Lua device on a Raspberry Pi Pico W
+- [Retail Kiosk](https://docs.heylua.ai/devices/examples/retail-kiosk.md): Build an AI-powered retail kiosk with receipt printing, NFC, and customer help requests
+- [Smart Office](https://docs.heylua.ai/devices/examples/smart-office.md): Build an AI facilities concierge with meeting room sensors, thermostats, and desk occupancy
+- [Warehouse Scanner](https://docs.heylua.ai/devices/examples/warehouse-inventory.md): Build an AI-powered warehouse inventory system with barcode scanners and weight sensors
+- [Windows Controller](https://docs.heylua.ai/devices/examples/windows-controller.md): Control your Windows PC remotely through your AI agent
+- [How It Works](https://docs.heylua.ai/devices/how-it-works.md): Architecture of the Lua Device Gateway
+- [MicroPython Client](https://docs.heylua.ai/devices/micropython-client.md): Connect a Raspberry Pi Pico W or any MicroPython board to your Lua agent
+- [MQTT Transport](https://docs.heylua.ai/devices/mqtt-client.md): Configure MQTT for constrained devices and unreliable networks
+- [Node.js Client](https://docs.heylua.ai/devices/node-client.md): Complete reference for the @lua-ai-global/device-client Node.js package
+- [What are Devices?](https://docs.heylua.ai/devices/overview.md): Give your AI agent a remote control for the physical world
+- [5-Minute Quickstart](https://docs.heylua.ai/devices/quickstart.md): Connect your first device to a Lua agent in under 5 minutes
+- [Self-Describing Commands](https://docs.heylua.ai/devices/self-describing-commands.md): How devices declare their capabilities without any server-side configuration
+- [Triggers](https://docs.heylua.ai/devices/triggers.md): Send events from devices to your agent and handle them with server-side logic
+- [Baskets Tools Example](https://docs.heylua.ai/examples/baskets.md): Complete shopping cart workflow with 9 tools
+- [Custom Data Tools Example](https://docs.heylua.ai/examples/custom-data.md): Vector search and custom data collections
+- [Tool Examples Overview](https://docs.heylua.ai/examples/overview.md): Learn from 30+ working tool examples
+- [Payment Tool Example](https://docs.heylua.ai/examples/payment.md): Stripe payment integration with environment variables
+- [Products Tools Example](https://docs.heylua.ai/examples/products.md): Complete CRUD operations for product catalog
+- [User Data Tools Example](https://docs.heylua.ai/examples/user-data.md): Persistent user storage: state machines, onboarding flows, and preferences
+- [Weather Tool Example](https://docs.heylua.ai/examples/weather.md): External API integration without requiring an API key
+- [Actions Component](https://docs.heylua.ai/formatting/actions.md): Interactive buttons and quick replies
+- [Custom Components](https://docs.heylua.ai/formatting/custom-components.md): Build your own visual components (Coming Soon)
+- [Flow Component](https://docs.heylua.ai/formatting/flow.md): Send WhatsApp Flows as interactive forms inside the chat
+- [Horizontal-List-Item Component (Carousel)](https://docs.heylua.ai/formatting/horizontal-list-item.md): Display items in a horizontally scrollable carousel format
+- [Images Component](https://docs.heylua.ai/formatting/images.md): Display image galleries and multiple photos
+- [Response Formatting](https://docs.heylua.ai/formatting/introduction.md): Create rich, visual responses across all channels
+- [Links Component](https://docs.heylua.ai/formatting/links.md): Display web URLs and search results
+- [List-Item Component](https://docs.heylua.ai/formatting/list-item.md): Display structured lists of products, rooms, menu items, or articles
+- [Navigate Component](https://docs.heylua.ai/formatting/navigate.md): Direct users to specific pages on your website
+- [Payment Component](https://docs.heylua.ai/formatting/payment.md): Secure payment and checkout links
+- [Your First Skill](https://docs.heylua.ai/getting-started/first-skill.md): Build a complete task management skill from scratch
+- [Installation](https://docs.heylua.ai/getting-started/installation.md): Install Lua CLI and set up your development environment
+- [Quick Start](https://docs.heylua.ai/getting-started/quick-start.md): Get your first AI skill running in 5 minutes
+- [Shopify](https://docs.heylua.ai/integrations/shopify.md): Add AI shopping assistant to your Shopify store
+- [SimplyBook.me](https://docs.heylua.ai/integrations/simplybook.md): Connect your booking system with Lua AI agent
+- [Square](https://docs.heylua.ai/integrations/square-appointments.md): Connect Square Appointments with your AI booking assistant
+- [Square](https://docs.heylua.ai/integrations/square-ecommerce.md): Connect Square POS and online store with your AI shopping assistant
+- [WooCommerce](https://docs.heylua.ai/integrations/woocommerce.md): Add AI shopping assistant to your WooCommerce store
+- [Creator Guide](https://docs.heylua.ai/marketplace/creator-guide.md): Publish and manage your skills on the marketplace
+- [Installer Guide](https://docs.heylua.ai/marketplace/installer-guide.md): Find and install skills for your agent
+- [Marketplace Overview](https://docs.heylua.ai/marketplace/overview.md): Discover, install, and publish AI skills
+- [Use Lua with Claude, Cursor & AI IDEs](https://docs.heylua.ai/mcp-for-builders.md): Connect Lua's documentation to your AI coding assistant in minutes via MCP
+- [Overview](https://docs.heylua.ai/overview.md)
+- [Agent](https://docs.heylua.ai/overview/agent.md): Unified configuration for your entire AI agent
+- [Channels](https://docs.heylua.ai/overview/channels.md): How users connect with your AI agent
+- [Devices](https://docs.heylua.ai/overview/devices.md): Connect physical hardware to your AI agent for bidirectional real-time control
+- [Features](https://docs.heylua.ai/overview/features.md): Built-in agent capabilities you can turn on or off per agent
+- [Jobs](https://docs.heylua.ai/overview/jobs.md): Scheduled tasks that run automatically
+- [MCP Servers](https://docs.heylua.ai/overview/mcp-servers.md): Extend your agent with external tools via Model Context Protocol
+- [Model Selection](https://docs.heylua.ai/overview/model-selection.md): Choose which LLM powers your agent — statically or dynamically per request
+- [Persona](https://docs.heylua.ai/overview/persona.md): Define your agent's personality and behavior
+- [PostProcessors](https://docs.heylua.ai/overview/postprocessors.md): Transform and enhance AI responses before sending to users
+- [PreProcessors](https://docs.heylua.ai/overview/preprocessors.md): Filter and validate messages before they reach your agent
+- [Resources](https://docs.heylua.ai/overview/resources.md): Your agent's knowledge base and reference materials
+- [Skill](https://docs.heylua.ai/overview/skill.md): Collections of tools that give your agent capabilities
+- [Tools](https://docs.heylua.ai/overview/tools.md): Individual functions your agent can execute
+- [Webhooks](https://docs.heylua.ai/overview/webhooks.md): HTTP endpoints for receiving external events
+- [Best Practices](https://docs.heylua.ai/template/best-practices.md): Tips and patterns for building great skills
+- [Building Skills](https://docs.heylua.ai/template/building-skills.md): Step-by-step guide to creating custom skills
+- [Multi-Skill Projects](https://docs.heylua.ai/template/multi-skill-projects.md): Organizing tools into multiple skills
+- [Template Overview](https://docs.heylua.ai/template/overview.md): Understanding the project template and optional examples
+- [Project Structure](https://docs.heylua.ai/template/project-structure.md): Understanding the template project organization
+
+## OpenAPI Specs
+
+- [openapi](https://docs.heylua.ai/api-reference/openapi.json)
+
+## Optional
+
+- [Platform](https://heylua.ai)
+- [npm Package](https://www.npmjs.com/package/lua-cli)
+- [Discord Community](https://discord.gg/SRPEuwCzaD)

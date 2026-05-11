@@ -1,0 +1,26 @@
+agent:
+  agentId: baseAgent_agent_1776995296296_hwf4neyjk
+  orgId: ac1654e2-32ee-492d-afd7-1fa2cedcd30a
+skills:
+  - name: transaction-analysis
+    skillId: e5c07fb0-2728-46c0-9891-6a9bd70c824d
+    version: 1.0.3
+  - name: reporting
+    skillId: 9319731e-008c-44f1-bd5d-63a67787c1e4
+    version: 1.0.3
+  - name: ping-skill
+    skillId: f9a6db78-9425-4ee8-8470-6f98d2175d1d
+    version: 1.0.2
+webhooks:
+  - name: transaction-intake
+    version: 1.0.2
+    webhookId: e54c79d1-63dd-488e-b18c-c9f5c116b529
+jobs: []
+preprocessors: []
+postprocessors: []
+mcpServers:
+  - mcpServerId: 43f0206e-4f7c-41b6-ac0e-4f8981992148
+    name: aml-intel-remote
+backup:
+  lastHash: 9220e327e7b1fc675fd5415aa07963e99b3a297f738f9e274e99020019e22b2d
+  lastPushedAt: '2026-04-26T08:22:01.087Z'
