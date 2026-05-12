@@ -14,6 +14,8 @@ MODEL_DIR = ROOT_DIR / "models"
 MODEL_PATH = MODEL_DIR / "isolation_forest.joblib"
 SCALER_PATH = MODEL_DIR / "scaler.joblib"
 
+DEFAULT_CONTAMINATION = 0.05
+
 FEATURES = [
     "amount_ngn",
     "hour_of_day",
@@ -67,7 +69,7 @@ def _normalize_dataframe(transactions: Iterable[Mapping[str, object]]) -> pd.Dat
 def train_model(
     transactions: Iterable[Mapping[str, object]],
     model_dir: Path | None = None,
-    contamination: float = 0.05,
+    contamination: float = DEFAULT_CONTAMINATION,
     random_state: int = 42,
 ) -> dict[str, object]:
     df = _normalize_dataframe(transactions)

@@ -682,3 +682,21 @@ Status: Completed
 - Result: PASS
 - Command: `pytest tests/test_anomaly_service.py -v`
 - Result: PASS
+
+---
+
+## Responsible AI Metrics Endpoint
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added Responsible AI metrics service in `backend/app/services/responsible_ai_service.py`.
+- Added API endpoint `GET /api/v1/responsible-ai/metrics`.
+- Added schema in `backend/app/schemas/responsible_ai.py`.
+- Added unit tests in `tests/test_responsible_ai_metrics.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
