@@ -627,3 +627,120 @@ Status: Completed
 
 ### Notes
 - Post-upgrade stability is confirmed across local regression and production threaded smoke usage.
+
+---
+
+## ML Anomaly Detection
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added Isolation Forest training utility in `scripts/train_anomaly_model.py` using `data/synthetic/transactions.csv`.
+- Added anomaly model helpers in `backend/app/services/anomaly_service.py`.
+- Added model artifacts directory to `.gitignore` (`models/`).
+- Added initial unit tests under `tests/test_anomaly_service.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+### Notes
+- Model artifacts are generated on demand and not committed.
+
+---
+
+## ML Anomaly Detection - Pipeline Integration
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added anomaly scoring fields to `Alert` model and alert API schemas.
+- Integrated Isolation Forest scoring into heuristic detection alert creation.
+- Added anomaly summary unit test in `tests/test_detection_anomaly_integration.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+---
+
+## NLP Entity Name Verification
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added name verification service in `backend/app/services/name_verification_service.py`.
+- Added ingest worker hook to apply name verification after ingestion.
+- Added unit test for shell keyword detection in `tests/test_name_verification_service.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+---
+
+## Responsible AI Metrics Endpoint
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added Responsible AI metrics service in `backend/app/services/responsible_ai_service.py`.
+- Added API endpoint `GET /api/v1/responsible-ai/metrics`.
+- Added schema in `backend/app/schemas/responsible_ai.py`.
+- Added unit tests in `tests/test_responsible_ai_metrics.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+---
+
+## Isolation Forest Validation Metrics
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added evaluation script `scripts/evaluate_anomaly_model.py` to compute precision, recall, F1, and anomaly rate.
+- Added validation card in `docs/VALIDATION_METRICS_CARD.md` with recorded metrics.
+
+### Metrics Snapshot
+- Total transactions: 2000
+- Labeled anomalies: 43
+- Predicted anomalies: 100
+- True positives: 35
+- Precision: 0.35
+- Recall: 0.814
+- F1: 0.4895
+- Anomaly rate: 0.05
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+---
+
+## Isolation Forest Threshold Tuning
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added score-threshold tuning in `scripts/evaluate_anomaly_model.py`.
+- Added optional `ANOMALY_SCORE_THRESHOLD` override in `backend/app/services/anomaly_service.py`.
+- Extended validation card with a tuning section.
+
+### Metrics Snapshot
+- Suggested score threshold: -0.604012
+- Tuned precision: 0.8333
+- Tuned recall: 0.6977
+- Tuned F1: 0.7595
+- Tuned anomaly rate: 0.018

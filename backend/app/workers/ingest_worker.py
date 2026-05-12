@@ -14,6 +14,7 @@ from app.core.init_db import init_db
 from app.core.redis_client import redis_client
 from app.models import Entity, IngestJob, JobStatus, Transaction
 from app.services.detection_service import run_heuristic_detection
+from app.services.name_verification_service import apply_name_verification
 from app.services.graph_service import graph_service
 
 
@@ -101,6 +102,7 @@ def process_job(job_id: str) -> None:
             job.processed_records = processed_count
 
         run_heuristic_detection(db)
+        apply_name_verification(db)
 
         job.status = JobStatus.completed
         job.processed_records = processed_count

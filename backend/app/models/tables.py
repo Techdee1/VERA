@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, event
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Numeric, String, Text, event
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -64,6 +64,9 @@ class Alert(Base):
         Enum(PatternType, name="pattern_type"), nullable=False, index=True
     )
     risk_score: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False)
+    anomaly_score: Mapped[float] = mapped_column(Numeric(8, 5), nullable=False, default=0.0)
+    anomaly_confidence: Mapped[float] = mapped_column(Numeric(5, 4), nullable=False, default=0.0)
+    anomaly_flag: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     entity_ids: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
     transaction_ids: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)

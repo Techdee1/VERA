@@ -30,3 +30,13 @@ VERA is an AI-powered financial trust verification platform for Nigerian financi
 - Detect fraud patterns with heuristics plus anomaly detection.
 - Propagate trust risk scores across connected entities.
 - Draft STR reports with human-review safeguards and immutable audit logs.
+
+## Anomaly Model (Isolation Forest)
+
+Generate the Isolation Forest model artifacts from the synthetic dataset:
+
+```bash
+python scripts/train_anomaly_model.py
+```
+
+This writes model artifacts to `models/isolation_forest.joblib` and `models/scaler.joblib` (not committed).
