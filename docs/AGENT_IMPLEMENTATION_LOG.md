@@ -665,3 +665,20 @@ Status: Completed
 - Result: PASS
 - Command: `pytest tests/test_anomaly_service.py -v`
 - Result: PASS
+
+---
+
+## NLP Entity Name Verification
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added name verification service in `backend/app/services/name_verification_service.py`.
+- Added ingest worker hook to apply name verification after ingestion.
+- Added unit test for shell keyword detection in `tests/test_name_verification_service.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
