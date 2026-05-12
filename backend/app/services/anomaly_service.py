@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Iterable, Mapping
 
@@ -15,6 +16,7 @@ MODEL_PATH = MODEL_DIR / "isolation_forest.joblib"
 SCALER_PATH = MODEL_DIR / "scaler.joblib"
 
 DEFAULT_CONTAMINATION = 0.05
+DEFAULT_SCORE_THRESHOLD: float | None = None
 
 FEATURES = [
     "amount_ngn",
@@ -140,8 +142,21 @@ def score_transaction(
     prediction = int(model.predict(X_scaled)[0])
     confidence = max(0.0, min(1.0, -score / 0.5))
 
+    threshold_raw = os.getenv("ANOMALY_SCORE_THRESHOLD")
+    threshold = DEFAULT_SCORE_THRESHOLD
+    if threshold_raw:
+        try:
+            threshold = float(threshold_raw)
+        except ValueError:
+            threshold = DEFAULT_SCORE_THRESHOLD
+
+    if threshold is not None:
+        is_anomaly = score < threshold
+    else:
+        is_anomaly = prediction == -1
+
     return {
         "anomaly_score": score,
-        "is_anomaly": prediction == -1,
+        "is_anomaly": is_anomaly,
         "confidence": float(confidence),
     }

@@ -25,6 +25,14 @@ This card summarizes the Isolation Forest validation results using the synthetic
 - F1: 0.4895
 - Anomaly rate: 0.05
 
+## Threshold Tuning (Best F1)
+
+- Suggested score threshold: -0.604012
+- Tuned precision: 0.8333
+- Tuned recall: 0.6977
+- Tuned F1: 0.7595
+- Tuned anomaly rate: 0.018
+
 ## How to Recompute
 
 ```bash

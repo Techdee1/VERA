@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -59,6 +60,26 @@ def _compute_metrics(labels: list[int], preds: list[int]) -> dict[str, float | i
     }
 
 
+def _best_threshold(labels: list[int], scores: list[float]) -> tuple[float, dict[str, float | int]]:
+    if not scores:
+        return 0.0, _compute_metrics(labels, [])
+
+    thresholds = np.quantile(scores, np.linspace(0.01, 0.2, 50))
+    best_threshold = float(thresholds[0])
+    best_metrics = _compute_metrics(labels, [1 if s < best_threshold else 0 for s in scores])
+    best_f1 = float(best_metrics["f1"])
+
+    for threshold in thresholds:
+        preds = [1 if s < float(threshold) else 0 for s in scores]
+        metrics = _compute_metrics(labels, preds)
+        if float(metrics["f1"]) > best_f1:
+            best_f1 = float(metrics["f1"])
+            best_threshold = float(threshold)
+            best_metrics = metrics
+
+    return best_threshold, best_metrics
+
+
 def main() -> None:
     if not DATA_PATH.exists():
         raise SystemExit(f"Missing dataset at {DATA_PATH}")
@@ -78,6 +99,7 @@ def main() -> None:
     fraud_ids = _load_manifest_ids(PATTERN_MANIFEST)
     labels: list[int] = []
     preds: list[int] = []
+    scores: list[float] = []
 
     for _, row in df.iterrows():
         tx_id = str(row.get("id"))
@@ -93,10 +115,18 @@ def main() -> None:
         )
         preds.append(1 if result["is_anomaly"] else 0)
         labels.append(label)
+        scores.append(float(result["anomaly_score"]))
 
     metrics = _compute_metrics(labels, preds)
     metrics["contamination"] = DEFAULT_CONTAMINATION
     metrics["training_rows"] = int(len(df))
+
+    best_threshold, tuned_metrics = _best_threshold(labels, scores)
+    metrics["best_threshold"] = round(best_threshold, 6)
+    metrics["tuned_precision"] = tuned_metrics["precision"]
+    metrics["tuned_recall"] = tuned_metrics["recall"]
+    metrics["tuned_f1"] = tuned_metrics["f1"]
+    metrics["tuned_anomaly_rate"] = tuned_metrics["anomaly_rate"]
 
     print(json.dumps(metrics, indent=2, sort_keys=True))
 

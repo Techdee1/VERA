@@ -726,3 +726,21 @@ Status: Completed
 - Result: PASS
 - Command: `pytest tests/test_anomaly_service.py -v`
 - Result: PASS
+
+---
+
+## Isolation Forest Threshold Tuning
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added score-threshold tuning in `scripts/evaluate_anomaly_model.py`.
+- Added optional `ANOMALY_SCORE_THRESHOLD` override in `backend/app/services/anomaly_service.py`.
+- Extended validation card with a tuning section.
+
+### Metrics Snapshot
+- Suggested score threshold: -0.604012
+- Tuned precision: 0.8333
+- Tuned recall: 0.6977
+- Tuned F1: 0.7595
+- Tuned anomaly rate: 0.018
