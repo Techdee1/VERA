@@ -17,6 +17,14 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    squad_secret_key: str = "" # Reverting to sandbox_sk for test
+    squad_webhook_secret: str = ""
+    squad_merchant_id: str = "" # Replace with your actual Squad Merchant ID from the dashboard
+    squad_api_base_url: str = "https://sandbox-api-d.squadco.com"
+    squad_ussd_endpoint: str = "/transaction/initiate/process-payment"
+    squad_transfer_endpoint: str = "/payout/transfer"
+    squad_webhook_url: str = ""
+    squad_quarantine_account: str = ""
     lua_transaction_intake_webhook_url: str = ""
     lua_transaction_intake_key: str = ""
     lua_transaction_intake_bearer_token: str = ""
