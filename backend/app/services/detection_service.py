@@ -4,6 +4,7 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from decimal import Decimal
 
 from sqlalchemy import Select, select
@@ -12,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.core.redis_client import redis_client
 from app.models import Alert, AlertStatus, Entity, PatternType, Transaction
 from app.models.enums import DecisionStatus
+from app.services.anomaly_service import score_transaction
 from app.services.audit_service import write_audit_event
 
 
@@ -23,6 +25,8 @@ class DetectionContext:
     now: datetime
     transactions: list[Transaction]
     entities: dict[uuid.UUID, Entity]
+    sender_degree: dict[uuid.UUID, int]
+    receiver_fan_in: dict[uuid.UUID, int]
 
 
 def _ensure_utc(value: datetime) -> datetime:
@@ -35,11 +39,56 @@ def _load_context(db: Session) -> DetectionContext:
     tx_rows = db.scalars(select(Transaction).order_by(Transaction.occurred_at.asc())).all()
     entity_rows = db.scalars(select(Entity)).all()
     entity_map = {row.id: row for row in entity_rows}
+    sender_degree: dict[uuid.UUID, set[uuid.UUID]] = defaultdict(set)
+    receiver_fan_in: dict[uuid.UUID, set[uuid.UUID]] = defaultdict(set)
+    for row in tx_rows:
+        sender_degree[row.source_entity_id].add(row.destination_entity_id)
+        receiver_fan_in[row.destination_entity_id].add(row.source_entity_id)
     return DetectionContext(
         now=datetime.now(UTC),
         transactions=tx_rows,
         entities=entity_map,
+        sender_degree={key: len(value) for key, value in sender_degree.items()},
+        receiver_fan_in={key: len(value) for key, value in receiver_fan_in.items()},
     )
+
+
+def _anomaly_summary_for_transactions(
+    transactions: list[Transaction],
+    sender_degree: dict[uuid.UUID, int],
+    receiver_fan_in: dict[uuid.UUID, int],
+    model_dir: Path | None = None,
+) -> dict[str, float | bool]:
+    if not transactions:
+        return {
+            "anomaly_score": 0.0,
+            "anomaly_confidence": 0.0,
+            "anomaly_flag": False,
+        }
+
+    scores: list[float] = []
+    confidences: list[float] = []
+    flags: list[bool] = []
+
+    for tx in transactions:
+        result = score_transaction(
+            {
+                "amount_ngn": float(tx.amount),
+                "occurred_at": tx.occurred_at,
+            },
+            sender_degree=sender_degree.get(tx.source_entity_id, 0),
+            receiver_fan_in=receiver_fan_in.get(tx.destination_entity_id, 0),
+            model_dir=model_dir,
+        )
+        scores.append(float(result["anomaly_score"]))
+        confidences.append(float(result["confidence"]))
+        flags.append(bool(result["is_anomaly"]))
+
+    return {
+        "anomaly_score": min(scores),
+        "anomaly_confidence": max(confidences),
+        "anomaly_flag": any(flags),
+    }
 
 
 def _existing_fingerprints(db: Session, pattern_type: PatternType) -> set[str]:
@@ -64,10 +113,16 @@ def _create_alert(
     entity_ids: list[uuid.UUID],
     transaction_ids: list[uuid.UUID],
     subgraph_json: dict,
+    anomaly_score: float,
+    anomaly_confidence: float,
+    anomaly_flag: bool,
 ) -> Alert:
     alert = Alert(
         pattern_type=pattern_type,
         risk_score=risk_score,
+        anomaly_score=anomaly_score,
+        anomaly_confidence=anomaly_confidence,
+        anomaly_flag=anomaly_flag,
         reason=reason,
         entity_ids=[str(x) for x in entity_ids],
         transaction_ids=[str(x) for x in transaction_ids],
@@ -88,6 +143,9 @@ def _create_alert(
             "alert_id": str(alert.id),
             "pattern_type": pattern_type.value,
             "risk_score": str(risk_score),
+            "anomaly_score": str(anomaly_score),
+            "anomaly_confidence": str(anomaly_confidence),
+            "anomaly_flag": anomaly_flag,
             "reason": reason,
             "entity_ids": [str(x) for x in entity_ids],
             "transaction_ids": [str(x) for x in transaction_ids],
@@ -136,6 +194,7 @@ def _detect_pos_cash_out_ring(db: Session, ctx: DetectionContext) -> int:
         )
         tx_ids = [row.id for row in rows]
         entity_ids = [*source_ids, beneficiary_id]
+        anomaly_summary = _anomaly_summary_for_transactions(rows, ctx.sender_degree, ctx.receiver_fan_in)
         _create_alert(
             db=db,
             pattern_type=PatternType.pos_cash_out_ring,
@@ -149,7 +208,13 @@ def _detect_pos_cash_out_ring(db: Session, ctx: DetectionContext) -> int:
                 "source_count": len(source_ids),
                 "total_volume": f"{total_amount:.2f}",
                 "window_hours": 72,
+                "anomaly_score": anomaly_summary["anomaly_score"],
+                "anomaly_confidence": anomaly_summary["anomaly_confidence"],
+                "anomaly_flag": anomaly_summary["anomaly_flag"],
             },
+            anomaly_score=float(anomaly_summary["anomaly_score"]),
+            anomaly_confidence=float(anomaly_summary["anomaly_confidence"]),
+            anomaly_flag=bool(anomaly_summary["anomaly_flag"]),
         )
         created += 1
 
@@ -214,6 +279,7 @@ def _detect_shell_director_web(db: Session, ctx: DetectionContext) -> int:
             f"Shell director web detected: {len(rows)} businesses linked by shared directors/address "
             f"with {len(inter_business)} inter-business transactions"
         )
+        anomaly_summary = _anomaly_summary_for_transactions(inter_business, ctx.sender_degree, ctx.receiver_fan_in)
 
         _create_alert(
             db=db,
@@ -227,7 +293,13 @@ def _detect_shell_director_web(db: Session, ctx: DetectionContext) -> int:
                 "group_key": group_key,
                 "business_count": len(rows),
                 "inter_business_tx_count": len(inter_business),
+                "anomaly_score": anomaly_summary["anomaly_score"],
+                "anomaly_confidence": anomaly_summary["anomaly_confidence"],
+                "anomaly_flag": anomaly_summary["anomaly_flag"],
             },
+            anomaly_score=float(anomaly_summary["anomaly_score"]),
+            anomaly_confidence=float(anomaly_summary["anomaly_confidence"]),
+            anomaly_flag=bool(anomaly_summary["anomaly_flag"]),
         )
         created += 1
 
@@ -300,6 +372,11 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
         )
 
         entity_ids = [origin_id, *sorted(used_intermediates), recon_id, destination_id]
+        anomaly_summary = _anomaly_summary_for_transactions(
+            [tx for tx in ctx.transactions if tx.id in set(candidate_tx_ids)],
+            ctx.sender_degree,
+            ctx.receiver_fan_in,
+        )
         _create_alert(
             db=db,
             pattern_type=PatternType.layered_transfer_chain,
@@ -314,7 +391,13 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
                 "destination_id": str(destination_id),
                 "intermediate_count": len(used_intermediates),
                 "window_hours": 48,
+                "anomaly_score": anomaly_summary["anomaly_score"],
+                "anomaly_confidence": anomaly_summary["anomaly_confidence"],
+                "anomaly_flag": anomaly_summary["anomaly_flag"],
             },
+            anomaly_score=float(anomaly_summary["anomaly_score"]),
+            anomaly_confidence=float(anomaly_summary["anomaly_confidence"]),
+            anomaly_flag=bool(anomaly_summary["anomaly_flag"]),
         )
         created += 1
 

@@ -9,6 +9,9 @@ class AlertListItemResponse(BaseModel):
     id: UUID
     pattern_type: str
     risk_score: Decimal
+    anomaly_score: float
+    anomaly_confidence: float
+    anomaly_flag: bool
     reason: str
     status: str
     entity_ids: list[str]
@@ -27,6 +30,9 @@ class AlertDetailResponse(BaseModel):
     id: UUID
     pattern_type: str
     risk_score: Decimal
+    anomaly_score: float
+    anomaly_confidence: float
+    anomaly_flag: bool
     reason: str
     status: str
     entity_ids: list[str]

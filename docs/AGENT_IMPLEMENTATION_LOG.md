@@ -648,3 +648,20 @@ Status: Completed
 
 ### Notes
 - Model artifacts are generated on demand and not committed.
+
+---
+
+## ML Anomaly Detection - Pipeline Integration
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added anomaly scoring fields to `Alert` model and alert API schemas.
+- Integrated Isolation Forest scoring into heuristic detection alert creation.
+- Added anomaly summary unit test in `tests/test_detection_anomaly_integration.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
