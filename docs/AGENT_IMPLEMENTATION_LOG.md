@@ -627,3 +627,24 @@ Status: Completed
 
 ### Notes
 - Post-upgrade stability is confirmed across local regression and production threaded smoke usage.
+
+---
+
+## ML Anomaly Detection
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added Isolation Forest training utility in `scripts/train_anomaly_model.py` using `data/synthetic/transactions.csv`.
+- Added anomaly model helpers in `backend/app/services/anomaly_service.py`.
+- Added model artifacts directory to `.gitignore` (`models/`).
+- Added initial unit tests under `tests/test_anomaly_service.py`.
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
+
+### Notes
+- Model artifacts are generated on demand and not committed.

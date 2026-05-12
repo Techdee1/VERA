@@ -17,3 +17,4 @@ venv/
 *.log
 node_modules/
 agent/.lua/
+models/
