@@ -700,3 +700,29 @@ Status: Completed
 - Result: PASS
 - Command: `pytest tests/test_anomaly_service.py -v`
 - Result: PASS
+
+---
+
+## Isolation Forest Validation Metrics
+Date: 2026-05-12
+Status: Completed
+
+### Work Completed
+- Added evaluation script `scripts/evaluate_anomaly_model.py` to compute precision, recall, F1, and anomaly rate.
+- Added validation card in `docs/VALIDATION_METRICS_CARD.md` with recorded metrics.
+
+### Metrics Snapshot
+- Total transactions: 2000
+- Labeled anomalies: 43
+- Predicted anomalies: 100
+- True positives: 35
+- Precision: 0.35
+- Recall: 0.814
+- F1: 0.4895
+- Anomaly rate: 0.05
+
+### Test Evidence
+- Command: `pytest tests/ -v`
+- Result: PASS
+- Command: `pytest tests/test_anomaly_service.py -v`
+- Result: PASS
