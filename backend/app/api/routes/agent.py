@@ -8,9 +8,19 @@ from app.core.config import settings
 from app.core.deps import get_db
 from app.schemas.agent import AgentIntakeRequest, AgentIntakeResponse
 from app.services.str_service import create_external_str_draft
+from app.services.ai_service import ai_service
 
 
 router = APIRouter()
+
+
+@router.get("/investigate/{account_id}")
+async def investigate_account(account_id: str):
+    """
+    LLM-powered investigation of an account based on graph data.
+    """
+    summary = await ai_service.investigate_account(account_id)
+    return {"account_id": account_id, "summary": summary}
 
 
 @router.post('/agent/intake', response_model=AgentIntakeResponse)

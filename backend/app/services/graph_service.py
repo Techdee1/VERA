@@ -68,5 +68,69 @@ class GraphService:
                 updated_at=datetime.now(timezone.utc).isoformat(),
             )
 
+    def upsert_squad_transaction(self, sender_id: str, receiver_id: str, tx_data: dict):
+        query = """
+        MERGE (s:Account {id: $sender_id})
+        MERGE (r:Account {id: $receiver_id})
+        CREATE (s)-[t:TRANSACTION {
+            amount: $amount,
+            currency: $currency,
+            reference: $reference,
+            timestamp: datetime($timestamp),
+            trust_score: $trust_score
+        }]->(r)
+        SET s.last_updated = datetime($timestamp),
+            r.last_updated = datetime($timestamp)
+        """
+        # Initial trust score calculation or placeholder
+        trust_score = self.calculate_trust_score(sender_id) 
+        
+        with neo4j_driver.session() as session:
+            session.run(
+                query,
+                sender_id=sender_id,
+                receiver_id=receiver_id,
+                amount=tx_data["amount"],
+                currency=tx_data["currency"],
+                reference=tx_data["reference"],
+                timestamp=tx_data["timestamp"],
+                trust_score=trust_score
+            )
+
+    def calculate_trust_score(self, account_id: str) -> float:
+        """
+        Calculates Eigenvector Centrality to detect if a node is becoming a 'fraud hub'.
+        High centrality in a network of flagged nodes indicates low trust.
+        """
+        # We use GDS if available, otherwise a cypher approximation or a simplified metric
+        # For this refactor, we implement a Cypher query that computes a centrality-like score
+        query = """
+        MATCH (a:Account {id: $account_id})
+        OPTIONAL MATCH (a)-[:TRANSACTION]-(neighbor)
+        WITH a, count(neighbor) as degree, collect(neighbor) as neighbors
+        UNWIND neighbors as n
+        OPTIONAL MATCH (n)-[:TRANSACTION]-(nn)
+        WITH a, degree, count(nn) as neighbor_degree
+        RETURN degree * 0.4 + neighbor_degree * 0.6 as hub_score
+        """
+        # In a real scenario, we'd use CALL gds.eigenvector.stream...
+        # Here we return a normalized trust score (1.0 - hub_score/max_expected)
+        with neo4j_driver.session() as session:
+            result = session.run(query, account_id=account_id).single()
+            if result and result["hub_score"]:
+                # Simple normalization for demo purposes
+                hub_score = result["hub_score"]
+                trust_score = max(0.0, 1.0 - (hub_score / 100.0))
+                return trust_score
+            return 1.0
+
+    def get_account_subgraph(self, account_id: str):
+        query = """
+        MATCH (a:Account {id: $account_id})-[r:TRANSACTION]-(neighbor)
+        RETURN a, r, neighbor
+        LIMIT 20
+        """
+        with neo4j_driver.session() as session:
+            return list(session.run(query, account_id=account_id))
 
 graph_service = GraphService()

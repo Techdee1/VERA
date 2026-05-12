@@ -17,6 +17,16 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
+    squad_secret_key: str = "" # Reverting to sandbox_sk for test
+    squad_merchant_id: str = "" # Replace with your actual Squad Merchant ID from the dashboard
+    squad_api_base_url: str = "https://sandbox-api-d.squadco.com"
+    squad_ussd_endpoint: str = "/transaction/initiate/process-payment"
+    squad_transfer_endpoint: str = "/payout/transfer"
+    squad_quarantine_account: str = ""
+    
+    risk_threshold_low: float = 0.4  # Trust score below 0.4 is high risk
+    risk_threshold_critical: float = 0.1 # Trust score below 0.1 is critical (>90% risk)
+
     lua_transaction_intake_webhook_url: str = ""
     lua_transaction_intake_key: str = ""
     lua_transaction_intake_bearer_token: str = ""
