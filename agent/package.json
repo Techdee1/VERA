@@ -1,0 +1,39 @@
+{
+  "name": "agent",
+  "version": "1.0.0",
+  "description": "GRACE Lua agent workspace",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lua:compile": "npx lua compile",
+    "lua:test:analysis:negative": "npx lua test skill --name analyze_transactions --input \"$(node -e \"const fs=require('node:fs');const data=fs.readFileSync('tests/fixtures/analysis-negative.csv','utf8');process.stdout.write(JSON.stringify({data,format:'csv',sensitivity:'medium',reason_mode:'deterministic'}));\")\"",
+    "lua:test:analysis:positive": "npx lua test skill --name analyze_transactions --input \"$(node -e \"const fs=require('node:fs');const data=fs.readFileSync('tests/fixtures/analysis-positive.csv','utf8');process.stdout.write(JSON.stringify({data,format:'csv',sensitivity:'medium',reason_mode:'deterministic'}));\")\"",
+    "lua:regression": "npm run build && npm run typecheck && npm run lua:compile && npm run lua:test:analysis:negative && npm run lua:test:analysis:positive",
+    "test:parse": "tsx tests/parseTransactionsTool.test.ts",
+    "test:graph": "tsx tests/buildEntityGraphTool.test.ts",
+    "test:patterns": "tsx tests/detectPatternsTool.test.ts",
+    "test:reason": "tsx tests/reasonAboutClusterTool.test.ts",
+    "test:risk": "tsx tests/scoreAndExplainRiskTool.test.ts",
+    "test:str": "tsx tests/generateSTRTool.test.ts",
+    "test:daily": "tsx tests/dailyTransactionScanJob.test.ts",
+    "test:post": "tsx tests/addNFIUDisclaimer.test.ts",
+    "test:skill-analysis": "tsx tests/transactionAnalysisSkill.test.ts",
+    "test:skill-reporting": "tsx tests/reportingSkill.test.ts",
+    "test:webhook-intake": "tsx tests/transactionIntakeWebhook.test.ts"
+  },
+  "dependencies": {
+    "csv-parse": "^6.2.1",
+    "groq-sdk": "^1.1.2",
+    "lua-cli": "^3.12.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}
