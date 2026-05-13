@@ -13,7 +13,7 @@ export const strApi = {
       ...(reviewerNotes ? { reviewer_notes: reviewerNotes } : {}),
     }).then((r) => r.data),
   updateDecision: (id, decision, reviewerNotes = null) =>
-    apiClient.post(`/str/${id}/decision`, { 
+    apiClient.patch(`/str/${id}/decision`, {
       decision,
       ...(reviewerNotes ? { reviewer_notes: reviewerNotes } : {}),
     }).then((r) => r.data),
