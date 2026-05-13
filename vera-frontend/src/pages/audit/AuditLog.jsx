@@ -1,7 +1,9 @@
 import { useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { DataTable } from '@/components/ui/DataTable'
-import { mockAuditLog } from '@/utils/mockData'
+import { Spinner } from '@/components/ui/Spinner'
+import { apiClient } from '@/api/client'
 import { formatDateTime } from '@/utils/formatters'
 import { CheckCircleIcon } from '@heroicons/react/24/outline'
 
@@ -28,13 +30,21 @@ const columns = [
 export default function AuditLog() {
   const [filters, setFilters] = useState({ action: '', user: '' })
 
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['audit-log'],
+    queryFn: () => apiClient.get('/audit-log?limit=200').then((r) => r.data),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  })
+
   const filtered = useMemo(() => {
-    return mockAuditLog.filter((e) => {
+    const rows = data ?? []
+    return rows.filter((e) => {
       if (filters.action && e.action !== filters.action) return false
       if (filters.user && !e.user.toLowerCase().includes(filters.user.toLowerCase())) return false
       return true
     })
-  }, [filters])
+  }, [data, filters])
 
   return (
     <div>
@@ -67,7 +77,15 @@ export default function AuditLog() {
         </div>
       </div>
 
-      <DataTable data={filtered} columns={columns} />
+      {isLoading ? (
+        <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+      ) : isError ? (
+        <div className="text-center py-16 text-[#4B5563] text-sm">Failed to load audit log.</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-[#4B5563] text-sm">No audit events recorded yet.</div>
+      ) : (
+        <DataTable data={filtered} columns={columns} />
+      )}
     </div>
   )
 }

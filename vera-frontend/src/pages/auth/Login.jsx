@@ -25,8 +25,8 @@ export default function Login() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-[#F7F9FC]">GR<span className="text-[#00D4AA]">ACE</span></h1>
-        <p className="text-sm text-[#94A3B8] mt-1">Compliance Intelligence Platform</p>
+        <h1 className="text-2xl font-bold text-[#F7F9FC]">VE<span className="text-[#00D4AA]">RA</span></h1>
+        <p className="text-sm text-[#94A3B8] mt-1">Financial Trust Verification Platform</p>
       </div>
 
       <div className="bg-[#111827] border border-[#2D3748] rounded-xl p-8">
