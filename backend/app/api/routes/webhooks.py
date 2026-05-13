@@ -82,30 +82,78 @@ async def verify_squad_signature(request: Request, x_squad_signature: str = Head
     
     return body
 
+_KANO_RING_STEPS = [
+    {
+        "sender_id": "DEMO-MUSA-001",
+        "receiver_id": "DEMO-SHELL-ALPHA-001",
+        "sender_name": "Musa Lawal",
+        "receiver_name": "Shell Co Alpha Ltd",
+        "amount": 2_800_000,
+        "ref_suffix": "KANO-STEP1",
+    },
+    {
+        "sender_id": "DEMO-SHELL-ALPHA-001",
+        "receiver_id": "DEMO-QUICK-CASH-001",
+        "sender_name": "Shell Co Alpha Ltd",
+        "receiver_name": "Quick Cash Services",
+        "amount": 2_600_000,
+        "ref_suffix": "KANO-STEP2",
+    },
+    {
+        "sender_id": "DEMO-QUICK-CASH-001",
+        "receiver_id": "DEMO-ALPHA-REMIT-001",
+        "sender_name": "Quick Cash Services",
+        "receiver_name": "Alpha Remit Ltd",
+        "amount": 2_400_000,
+        "ref_suffix": "KANO-STEP3",
+    },
+    {
+        "sender_id": "DEMO-ALPHA-REMIT-001",
+        "receiver_id": "DEMO-FINAL-BENE-001",
+        "sender_name": "Alpha Remit Ltd",
+        "receiver_name": "Final Beneficiary Account",
+        "amount": 2_200_000,
+        "ref_suffix": "KANO-STEP4",
+    },
+]
+
+
+async def _run_kano_ring_scenario():
+    """Fires the 4-step Kano Shell Ring layered transfer chain with 2s gaps."""
+    import string, random
+    session_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    for step in _KANO_RING_STEPS:
+        payload = {
+            "Event": "charge.success",
+            "Body": {
+                "transaction_ref": f"DEMO-{session_id}-{step['ref_suffix']}",
+                "amount": step["amount"],
+                "currency": "NGN",
+                "sender_id": step["sender_id"],
+                "receiver_id": step["receiver_id"],
+                "sender_name": step["sender_name"],
+                "receiver_name": step["receiver_name"],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+        }
+        await process_squad_webhook(payload)
+        await asyncio.sleep(2)
+
+
 @router.post("/squad/simulate", status_code=202)
 async def simulate_squad_webhook():
     """
-    Demo endpoint — fires a synthetic Squad payment through the full VERA pipeline
-    without requiring HMAC verification. For live demos only.
+    Demo endpoint — fires the scripted 4-step Kano Shell Ring fraud scenario through
+    the full VERA pipeline without HMAC verification. For live demos only.
     """
-    import random, string
-    ref = "DEMO-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
-    amount = random.choice([450000, 975000, 1250000, 2800000, 500000])
-    payload = {
-        "Event": "charge.success",
-        "Body": {
-            "transaction_ref": ref,
-            "amount": amount,
-            "currency": "NGN",
-            "sender_id": f"DEMO-SENDER-{random.randint(1,5):02d}",
-            "receiver_id": f"DEMO-RECEIVER-{random.randint(1,5):02d}",
-            "sender_name": random.choice(["Musa Lawal", "Fatima Onyeka", "Chidi Okafor", "Amaka Bello", "Tunde Adeyemi"]),
-            "receiver_name": random.choice(["Shell Co Alpha Ltd", "Zenith Transfers Ltd", "Quick Cash Services", "Alpha Remit Ltd"]),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        },
+    asyncio.create_task(_run_kano_ring_scenario())
+    return {
+        "status": "success",
+        "message": "Kano Shell Ring scenario initiated — 4 transactions firing over ~8 seconds",
+        "steps": 4,
+        "duration_estimate_seconds": 8,
+        "scenario": "Layered Transfer Chain — Musa Lawal → Shell Co Alpha → Quick Cash → Alpha Remit → Final Beneficiary",
     }
-    asyncio.create_task(process_squad_webhook(payload))
-    return {"status": "success", "message": "Simulated Squad transaction injected", "reference": ref, "amount": amount}
 
 
 @router.post("/squad", status_code=202)

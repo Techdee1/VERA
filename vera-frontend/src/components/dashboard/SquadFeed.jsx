@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
 import { formatNaira } from '@/utils/formatters'
@@ -29,58 +29,135 @@ function truncate(str, maxLen) {
   return str.length > maxLen ? str.slice(0, maxLen) + '…' : str
 }
 
+const STEP_LABELS = [
+  'Musa Lawal → Shell Co Alpha',
+  'Shell Co Alpha → Quick Cash',
+  'Quick Cash → Alpha Remit',
+  'Alpha Remit → Final Beneficiary',
+]
+
 export function SquadFeed() {
   const queryClient = useQueryClient()
-  const [simulating, setSimulating] = useState(false)
-  const [lastSim, setLastSim] = useState(null)
+  const [simStep, setSimStep] = useState(0) // 0 = idle, 1-4 = in progress, 5 = analyzing, -1 = done
+  const [toast, setToast] = useState(null)
+  const prevAlertCountRef = useRef(null)
+  const fastPollEndRef = useRef(null)
+  const stepTimerRef = useRef(null)
+
+  const isSimulating = simStep > 0 && simStep <= 5
+
+  // Tighten alert polling for 30s post-simulation
+  const { data: alertsData } = useQuery({
+    queryKey: ['alerts'],
+    queryFn: () => apiClient.get('/alerts').then(r => r.data),
+    refetchInterval: fastPollEndRef.current && Date.now() < fastPollEndRef.current ? 3000 : 15000,
+  })
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['recent-transactions'],
     queryFn: () => apiClient.get('/transactions/recent').then(r => r.data),
-    refetchInterval: 8000,
-    staleTime: 6000,
+    refetchInterval: fastPollEndRef.current && Date.now() < fastPollEndRef.current ? 2000 : 8000,
+    staleTime: 1500,
   })
 
   const transactions = Array.isArray(data) ? data : data?.transactions ?? []
 
+  // Detect new alert after simulation
+  useEffect(() => {
+    const alerts = alertsData?.items ?? alertsData ?? []
+    const count = Array.isArray(alerts) ? alerts.length : 0
+    if (prevAlertCountRef.current !== null && count > prevAlertCountRef.current && fastPollEndRef.current) {
+      const newest = Array.isArray(alerts) ? alerts[0] : null
+      setToast({
+        message: newest
+          ? `New alert: ${newest.pattern_type ?? newest.patternType ?? 'Fraud Pattern'} detected`
+          : 'New fraud alert detected',
+        type: 'alert',
+      })
+      setTimeout(() => setToast(null), 6000)
+    }
+    prevAlertCountRef.current = count
+  }, [alertsData])
+
   async function handleSimulate() {
-    setSimulating(true)
+    if (isSimulating) return
+
+    // Start step counter
+    setSimStep(1)
+    fastPollEndRef.current = Date.now() + 30_000
+
+    let step = 1
+    stepTimerRef.current = setInterval(() => {
+      step += 1
+      if (step <= 4) {
+        setSimStep(step)
+      } else if (step === 5) {
+        setSimStep(5) // "Analyzing..."
+      } else {
+        clearInterval(stepTimerRef.current)
+        setSimStep(-1) // done
+        setTimeout(() => setSimStep(0), 3000)
+      }
+    }, 2200)
+
     try {
-      const res = await apiClient.post('/webhooks/squad/simulate').then(r => r.data)
-      setLastSim(res)
-      // Refresh feed after a short delay to let the worker process it
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ['recent-transactions'] })
-        queryClient.invalidateQueries({ queryKey: ['alerts'] })
-      }, 2500)
+      await apiClient.post('/webhooks/squad/simulate')
+      // Immediately start refreshing
+      queryClient.invalidateQueries({ queryKey: ['recent-transactions'] })
     } catch {
       // silent — demo mode
-    } finally {
-      setSimulating(false)
     }
+  }
+
+  // Cleanup on unmount
+  useEffect(() => () => clearInterval(stepTimerRef.current), [])
+
+  function renderButtonLabel() {
+    if (simStep >= 1 && simStep <= 4) {
+      return (
+        <>
+          <span className="w-2.5 h-2.5 border border-blue-400 border-t-transparent rounded-full animate-spin" />
+          Step {simStep}/4 — {STEP_LABELS[simStep - 1]}
+        </>
+      )
+    }
+    if (simStep === 5) {
+      return (
+        <>
+          <span className="w-2.5 h-2.5 border border-amber-400 border-t-transparent rounded-full animate-spin" />
+          Analyzing pattern…
+        </>
+      )
+    }
+    if (simStep === -1) {
+      return <>✓ Kano Ring Complete</>
+    }
+    return <>⚡ Simulate Kano Shell Ring</>
   }
 
   return (
     <div className="bg-[#111827] border border-[#2D3748] rounded-lg overflow-hidden">
+      {toast && (
+        <div className={`px-4 py-2 text-xs font-medium flex items-center gap-2 ${
+          toast.type === 'alert'
+            ? 'bg-red-500/10 border-b border-red-500/30 text-red-400'
+            : 'bg-green-500/10 border-b border-green-500/30 text-green-400'
+        }`}>
+          <span>{toast.type === 'alert' ? '🚨' : '✓'}</span>
+          {toast.message}
+        </div>
+      )}
+
       <div className="px-4 py-3 border-b border-[#2D3748] flex items-center gap-3">
         <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium">Squad Live Feed</p>
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         <div className="ml-auto flex items-center gap-2">
-          {lastSim && (
-            <span className="text-[10px] text-green-400 font-mono">
-              ✓ {lastSim.reference} injected
-            </span>
-          )}
           <button
             onClick={handleSimulate}
-            disabled={simulating}
-            className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+            disabled={isSimulating}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-70 max-w-[320px] truncate"
           >
-            {simulating ? (
-              <><span className="w-2.5 h-2.5 border border-blue-400 border-t-transparent rounded-full animate-spin" /> Injecting…</>
-            ) : (
-              <>⚡ Simulate Squad Transaction</>
-            )}
+            {renderButtonLabel()}
           </button>
         </div>
       </div>
