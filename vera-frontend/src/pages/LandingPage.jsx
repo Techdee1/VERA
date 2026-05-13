@@ -226,7 +226,7 @@ function Nav() {
             className="text-white text-lg font-display tracking-wide"
             style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700 }}
           >
-            GR<span style={{ color: ACCENT }}>ACE</span>
+            VE<span style={{ color: ACCENT }}>RA</span>
           </span>
         </a>
 
@@ -293,7 +293,7 @@ export default function LandingPage() {
                 className="mb-10"
                 style={{ fontSize: '1rem', color: '#94A3B8', lineHeight: 1.7, maxWidth: '480px' }}
               >
-                VERA ingests your transactions, builds a live relationship graph across every entity in your system, and detects fraud patterns that threshold-based tools are designed to miss. When a pattern is confirmed, it auto-drafts an NFIU-compliant Suspicious Transaction Report for your verification analyst to review.
+                VERA — Verification Engine for Risk Analysis — sits on top of Squad's payment infrastructure and watches every transaction in real time. It builds a live relationship graph, detects fraud patterns threshold-based tools miss, and auto-drafts NFIU-compliant STRs when patterns are confirmed. Squad powers both the intelligence and the action.
               </p>
 
               <a
@@ -343,10 +343,10 @@ export default function LandingPage() {
               className="font-display mb-5"
               style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.15, color: DARK, letterSpacing: '-0.02em' }}
             >
-              Traditional compliance tools are blind to the networks behind the transactions.
+              8 accounts. Each one clean. All sending to the same beneficiary. Your current system sees nothing.
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#4B5563', lineHeight: 1.7 }}>
-              Most AML systems were built to check records one at a time. Money laundering is a network problem. That gap is where fraud hides.
+              Traditional AML tools check entities one by one. Financial crime is coordinated. The gap between individual checks and network reality is where billions disappear.
             </p>
           </div>
 
@@ -356,19 +356,19 @@ export default function LandingPage() {
               {
                 icon: <IconUser className="w-5 h-5" style={{ color: DARK }} />,
                 title: 'Customers verified alone',
-                body: 'KYC checks treat each entity in isolation. Shell companies, layered accounts, and shared directors are invisible to flat verification systems.',
+                body: 'KYC tools verify one name against one record. When 8 accounts share a hidden director or funnel funds to the same beneficiary, nothing fires. The fraud is in the relationship — not the record.',
                 delay: '0ms',
               },
               {
                 icon: <IconAlert className="w-5 h-5" style={{ color: DARK }} />,
                 title: 'Thresholds miss structured fraud',
-                body: 'Fixed rules and amount thresholds are well-known to launderers. Sophisticated fraud is specifically designed to fall below detection.',
+                body: 'Structured fraud is engineered to stay below your thresholds. Launderers know your rules better than your compliance team does. Rules cannot catch what is designed to avoid them.',
                 delay: '80ms',
               },
               {
                 icon: <IconGlobe className="w-5 h-5" style={{ color: DARK }} />,
                 title: 'Global tools, local gaps',
-                body: 'International AML platforms are trained on US and European patterns. POS cash-out rings, agent banking chains, and naira-crypto flows are invisible to them.',
+                body: 'International AML platforms were calibrated on European transaction patterns. POS cash-out rings, mobile money agent chains, and naira-crypto loops are Nigerian realities these tools were never trained on.',
                 delay: '160ms',
               },
             ].map(({ icon, title, body, delay }) => (
@@ -423,11 +423,11 @@ export default function LandingPage() {
           {/* Pipeline */}
           <div className="lg-fade grid grid-cols-2 md:grid-cols-5 gap-px rounded-xl overflow-hidden mb-16" style={{ border: '1px solid #1E3358', background: '#1E3358' }}>
             {[
-              { n: '01', title: 'Ingest',  desc: 'Transactions received via secure API, normalised and staged' },
-              { n: '02', title: 'Resolve', desc: 'Entity deduplication across BVN, NIN and account numbers' },
-              { n: '03', title: 'Model',   desc: 'Neo4j graph updated with typed nodes and weighted edges' },
-              { n: '04', title: 'Detect',  desc: 'Heuristic engine scores subgraphs for suspicious topologies' },
-              { n: '05', title: 'Report',  desc: 'NFIU-compliant STR auto-drafted via LLM for reviewer sign-off' },
+              { n: '01', title: 'Ingest via Squad',  desc: 'Every transaction processed through Squad fires a real-time webhook into VERA. The moment money moves, VERA knows.' },
+              { n: '02', title: 'Resolve Entities', desc: 'Deduplication across BVN, NIN, account numbers, and name similarity. One person, one node — regardless of how many accounts they hold.' },
+              { n: '03', title: 'Build the Graph',   desc: 'Neo4j graph updated with every entity and relationship. The full financial network becomes visible for the first time.' },
+              { n: '04', title: 'Detect Patterns',  desc: 'Heuristic engine and trained anomaly detection model score every subgraph. Nigerian fraud topologies — POS rings, shell webs, layered chains — are what it was trained on.' },
+              { n: '05', title: 'Report + File via Squad',  desc: 'VERA drafts the NFIU-compliant STR automatically. When your analyst files it, VERA initiates the financial action through Squad — every compliance decision is financially traceable.' },
             ].map(({ n, title, desc }) => (
               <div
                 key={n}
@@ -458,7 +458,7 @@ export default function LandingPage() {
                 How the graph model works
               </h3>
               <p className="mb-4" style={{ fontSize: '0.95rem', color: '#94A3B8', lineHeight: 1.75 }}>
-                Every person, business, and account in your institution is a <strong style={{ color: '#CBD5E1' }}>node</strong> in the graph. Every transaction between them is an <strong style={{ color: '#CBD5E1' }}>edge</strong>, weighted by volume, frequency, and recency. VERA continuously updates this graph as new data arrives.
+                Every person, business, and account is a <strong style={{ color: '#CBD5E1' }}>node</strong>. Every transaction is an <strong style={{ color: '#CBD5E1' }}>edge</strong>. VERA maps the full relationship network and evaluates topology — not individual records. When a subgraph crosses the alert threshold, the STR is drafted automatically and queued for analyst review.
               </p>
               <p className="mb-4" style={{ fontSize: '0.95rem', color: '#94A3B8', lineHeight: 1.75 }}>
                 The detection engine evaluates subgraph topology — not individual records — to surface patterns like cash-out rings, layered transfer chains, and shell director webs. A risk score is computed per entity and propagates to connected nodes the moment a suspicious pattern is confirmed.
@@ -495,10 +495,10 @@ export default function LandingPage() {
               className="font-display mb-5"
               style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.15, color: DARK, letterSpacing: '-0.02em' }}
             >
-              Built for Nigeria's financial topology.
+              The fraud patterns destroying Nigerian financial institutions aren't in the textbooks. They're in the streets.
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#4B5563', lineHeight: 1.7 }}>
-              The patterns that drive financial crime in Nigeria are not the same patterns that drive it elsewhere. VERA is trained on local reality — the way money actually moves across Nigerian banking, telecoms, and informal channels.
+              Global AML tools were built for global fraud. VERA was built for the patterns that move through Nigerian POS networks, mobile money agents, bureau de change corridors, and informal channels. The difference is everything.
             </p>
           </div>
 
@@ -516,22 +516,22 @@ export default function LandingPage() {
               {[
                 {
                   title: 'POS Cash-Out Rings',
-                  body: 'Networks of agents recycling funds through point-of-sale terminals — structured to stay below reporting thresholds. A topology that looks routine until you see the full ring.',
+                  body: 'A network of agents funnelling funds to one beneficiary through POS terminals — each transaction under the ₦5M reporting threshold. Invisible to rule-based systems. Obvious in a graph.',
                   delay: '0ms',
                 },
                 {
                   title: 'Agent Banking Chains',
-                  body: 'Funds layered across mobile money agents in micro-transactions, breaking the trail across dozens of accounts and obscuring the origin across multiple banks.',
+                  body: 'Funds split across dozens of mobile money agents in micro-transactions — each leg looking routine, the chain invisible without a network view. A pattern unique to Nigeria's agent banking infrastructure.',
                   delay: '80ms',
                 },
                 {
                   title: 'Naira-Crypto-Naira Loops',
-                  body: 'P2P flows through stablecoins and bureau de change that re-enter the formal banking system appearing clean — a pattern largely invisible to conventional AML rules.',
+                  body: 'Clean naira enters a P2P crypto channel, moves through stablecoins, and re-emerges in the formal banking system appearing legitimate. The entry and exit points are the tell — VERA catches them.',
                   delay: '160ms',
                 },
                 {
                   title: 'Shell Director Webs',
-                  body: 'Businesses sharing directors, addresses, or BVNs — signals buried in CAC registrations and cross-bank data. VERA surfaces them as connected nodes in the graph.',
+                  body: 'Three businesses. Two shared directors. One registered address. All transacting with each other. Each entity passes individual verification. In VERA's graph, the web is immediate.',
                   delay: '240ms',
                 },
               ].map(({ title, body, delay }) => (
@@ -568,7 +568,7 @@ export default function LandingPage() {
               className="font-display mb-4"
               style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.15, color: '#FFFFFF', letterSpacing: '-0.02em' }}
             >
-              What VERA gives your verification team.
+              What VERA — Verification Engine for Risk Analysis — gives your compliance team.
             </h2>
           </div>
 
@@ -577,19 +577,19 @@ export default function LandingPage() {
               {
                 icon: <IconNetwork className="w-6 h-6" style={{ color: ACCENT }} />,
                 title: 'Live Trust Graph',
-                body: 'A continuously updated relationship graph of every entity in your institution. Risk scores propagate across connections the moment new suspicious patterns are detected.',
+                body: 'Every entity in your institution, mapped in real time. Risk scores propagate across connected nodes the moment a pattern is detected. Powered by live Squad transaction data.',
                 delay: '0ms',
               },
               {
                 icon: <IconFileText className="w-6 h-6" style={{ color: ACCENT }} />,
                 title: 'Automated STR Drafting',
-                body: 'When suspicious patterns are confirmed, VERA drafts an NFIU-compliant Suspicious Transaction Report automatically. Your verification analyst reviews, edits, and approves — never writes from scratch.',
+                body: 'When suspicious patterns are confirmed, VERA drafts a complete NFIU-compliant STR from the graph evidence. Your analyst reviews, edits, and approves — then files via Squad. Every compliance decision is recorded with a Squad transaction reference, financially traceable and immutably logged.',
                 delay: '80ms',
               },
               {
                 icon: <IconShield className="w-6 h-6" style={{ color: ACCENT }} />,
                 title: 'Immutable Audit Trail',
-                body: 'Every detection, every review, every decision is logged with a cryptographic hash. Built for regulator inspection and NDPA-compliant data handling.',
+                body: 'Every detection, review, and decision logged with a cryptographic hash. Built for NFIU and CBN regulator inspection. NDPA-compliant by design.',
                 delay: '160ms',
               },
             ].map(({ icon, title, body, delay }) => (
@@ -642,13 +642,16 @@ export default function LandingPage() {
                 Your data never leaves your walls.
               </h2>
               <p className="mb-5" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
-                VERA deploys inside your own infrastructure — your Azure tenant, your private server, or a dedicated cloud instance we manage for you. Your transaction data is processed entirely within your environment.
+                VERA deploys inside your own infrastructure — your cloud tenant, your private server, or a dedicated instance we manage. Your transaction data never leaves your environment. The only data that moves is what you choose to send to NFIU — and only when your analyst approves it.
               </p>
               <p className="mb-5" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
                 We provide the software. You keep the keys.
               </p>
               <p className="mb-10" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
                 The Neo4j graph database, PostgreSQL transaction store, and VERA detection engine run on your compute. STR reports are the only data that leave — and only to NFIU, by your verification analyst's action.
+              </p>
+              <p className="mb-10" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
+                Squad transactions are received via secure webhook. VERA processes them entirely within your infrastructure. Squad powers the data flow — your walls control it.
               </p>
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
@@ -693,7 +696,7 @@ export default function LandingPage() {
               Open the Live Dashboard →
             </a>
             <p className="mt-6" style={{ fontSize: '0.85rem', color: '#475569' }}>
-              No login required. The full pipeline runs live — ingestion, detection, STR generation.
+              No login required. The full pipeline is live — Squad webhook ingestion, graph detection, STR generation. See it run.
             </p>
           </div>
         </div>
@@ -720,11 +723,11 @@ export default function LandingPage() {
                 <span
                   style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: '#FFFFFF' }}
                 >
-                  GR<span style={{ color: ACCENT }}>ACE</span>
+                  VE<span style={{ color: ACCENT }}>RA</span>
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.65 }}>
-                Network-based trust verification for Nigeria.
+                VERA — Verification Engine for Risk Analysis. Network-based trust verification for Nigeria, powered by Squad.
               </p>
             </div>
 
@@ -740,7 +743,7 @@ export default function LandingPage() {
             <div>
               <p style={{ fontSize: '0.75rem', color: '#374151', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>Recognition</p>
               <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.65 }}>
-                Built for the Microsoft AI Skills Week 2026 RegTech Hackathon.
+                Built for Squad Hackathon 3.0 — Smart Systems: The Intelligent Economy.
               </p>
             </div>
           </div>
