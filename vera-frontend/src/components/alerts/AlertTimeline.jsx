@@ -11,7 +11,7 @@ const STATUS_EVENTS = {
 
 export function AlertTimeline({ alert }) {
   const events = [
-    { time: alert.detectedAt, status: 'OPEN', user: 'GRACE Engine' },
+    { time: alert.detectedAt, status: 'OPEN', user: 'VERA Engine' },
     ...(alert.status !== 'OPEN' ? [{ time: alert.detectedAt, status: alert.status, user: 'Akeem Jr.' }] : []),
   ]
 

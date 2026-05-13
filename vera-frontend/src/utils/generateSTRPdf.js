@@ -121,7 +121,7 @@ function drawFooter(doc) {
     doc.setFontSize(8)
 
     doc.text('CONFIDENTIAL — For regulatory use only', MARGIN, y)
-    doc.text('GRACE Compliance Platform', pageWidth / 2, y, { align: 'center' })
+    doc.text('VERA Trust Verification Platform', pageWidth / 2, y, { align: 'center' })
     doc.text(`Page ${i} of ${pageCount}`, pageWidth - MARGIN, y, { align: 'right' })
   }
 }
@@ -216,7 +216,7 @@ export function generateSTRPdf({ str, alert, entities = [] }) {
   y = addSectionHeader(doc, 'Reporting Institution', y, pageWidth)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
-  doc.text('GRACE — Graph-based Risk And Compliance Engine', MARGIN, y)
+  doc.text('VERA — Verification Engine for Risk Analysis', MARGIN, y)
   y += 5
   doc.text('Filed via automated compliance platform', MARGIN, y)
   y += 7

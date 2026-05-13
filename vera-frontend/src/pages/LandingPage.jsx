@@ -147,7 +147,7 @@ function DeploymentDiagram() {
       xmlns="http://www.w3.org/2000/svg"
       className="w-full max-w-sm mx-auto lg:max-w-none"
       role="img"
-      aria-label="GRACE deployment architecture diagram showing GRACE Engine, Neo4j graph database, and PostgreSQL inside a bank infrastructure boundary. Transactions flow in from outside; STR reports flow out to NFIU."
+      aria-label="VERA deployment architecture diagram showing VERA Engine, Neo4j graph database, and PostgreSQL inside a bank infrastructure boundary. Transactions flow in from outside; STR reports flow out to NFIU."
     >
       <defs>
         <marker id="dd-arr-g" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
@@ -162,9 +162,9 @@ function DeploymentDiagram() {
       <rect x="18" y="22" width="310" height="242" rx="10" fill="none" stroke="#D1D5DB" strokeWidth="1.5" strokeDasharray="7,4" />
       <text x="173" y="16" textAnchor="middle" fontSize="9.5" fill="#9CA3AF" fontFamily="DM Sans, sans-serif" letterSpacing="1.5">YOUR INFRASTRUCTURE</text>
 
-      {/* GRACE Engine box */}
+      {/* VERA Engine box */}
       <rect x="44" y="46" width="258" height="56" rx="6" fill="#F0FFF8" stroke={ACCENT} strokeWidth="1.5" />
-      <text x="173" y="68" textAnchor="middle" fontSize="12" fill={DARK} fontFamily="Space Grotesk, DM Sans, sans-serif" fontWeight="700">GRACE Engine</text>
+      <text x="173" y="68" textAnchor="middle" fontSize="12" fill={DARK} fontFamily="Space Grotesk, DM Sans, sans-serif" fontWeight="700">VERA Engine</text>
       <text x="173" y="86" textAnchor="middle" fontSize="9" fill="#6B7280" fontFamily="DM Sans, sans-serif">FastAPI  ·  Redis Queue  ·  Detection Workers</text>
 
       {/* Connector tree */}
@@ -271,7 +271,7 @@ export default function LandingPage() {
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-8"
                 style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}35`, color: ACCENT }}
               >
-                Microsoft AI Skills Week 2026 · RegTech Hackathon
+                Squad Hackathon 3.0 · Smart Systems: The Intelligent Economy
               </div>
 
               <h1
@@ -279,21 +279,21 @@ export default function LandingPage() {
                 style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', lineHeight: 1.1, color: '#FFFFFF', letterSpacing: '-0.02em' }}
               >
                 Financial crime hides<br />in networks.{' '}
-                <span style={{ color: ACCENT }}>GRACE doesn't miss.</span>
+                <span style={{ color: ACCENT }}>VERA sees them all.</span>
               </h1>
 
               <p
                 className="mb-4"
                 style={{ fontSize: '1.15rem', fontWeight: 500, color: '#CBD5E1', lineHeight: 1.55 }}
               >
-                Graph-based AML intelligence built for how money actually moves in Nigeria.
+                Network-based trust verification built for how money actually moves in Nigeria.
               </p>
 
               <p
                 className="mb-10"
                 style={{ fontSize: '1rem', color: '#94A3B8', lineHeight: 1.7, maxWidth: '480px' }}
               >
-                GRACE ingests your transactions, builds a live relationship graph across every entity in your system, and detects laundering patterns that threshold-based tools are designed to miss. When a pattern is confirmed, it auto-drafts an NFIU-compliant Suspicious Transaction Report for your compliance officer to review.
+                VERA ingests your transactions, builds a live relationship graph across every entity in your system, and detects fraud patterns that threshold-based tools are designed to miss. When a pattern is confirmed, it auto-drafts an NFIU-compliant Suspicious Transaction Report for your verification analyst to review.
               </p>
 
               <a
@@ -458,13 +458,13 @@ export default function LandingPage() {
                 How the graph model works
               </h3>
               <p className="mb-4" style={{ fontSize: '0.95rem', color: '#94A3B8', lineHeight: 1.75 }}>
-                Every person, business, and account in your institution is a <strong style={{ color: '#CBD5E1' }}>node</strong> in the graph. Every transaction between them is an <strong style={{ color: '#CBD5E1' }}>edge</strong>, weighted by volume, frequency, and recency. GRACE continuously updates this graph as new data arrives.
+                Every person, business, and account in your institution is a <strong style={{ color: '#CBD5E1' }}>node</strong> in the graph. Every transaction between them is an <strong style={{ color: '#CBD5E1' }}>edge</strong>, weighted by volume, frequency, and recency. VERA continuously updates this graph as new data arrives.
               </p>
               <p className="mb-4" style={{ fontSize: '0.95rem', color: '#94A3B8', lineHeight: 1.75 }}>
                 The detection engine evaluates subgraph topology — not individual records — to surface patterns like cash-out rings, layered transfer chains, and shell director webs. A risk score is computed per entity and propagates to connected nodes the moment a suspicious pattern is confirmed.
               </p>
               <p style={{ fontSize: '0.95rem', color: '#94A3B8', lineHeight: 1.75 }}>
-                When a flagged subgraph crosses the alert threshold, GRACE assembles the evidence package and passes it to the STR generation pipeline. Your compliance officer reviews a structured draft — they never write from scratch.
+                When a flagged subgraph crosses the alert threshold, VERA assembles the evidence package and passes it to the STR generation pipeline. Your verification analyst reviews a structured draft — they never write from scratch.
               </p>
             </div>
             <div className="lg-fade flex items-center justify-center">
@@ -498,7 +498,7 @@ export default function LandingPage() {
               Built for Nigeria's financial topology.
             </h2>
             <p style={{ fontSize: '1.05rem', color: '#4B5563', lineHeight: 1.7 }}>
-              The patterns that drive financial crime in Nigeria are not the same patterns that drive it elsewhere. GRACE is trained on local reality — the way money actually moves across Nigerian banking, telecoms, and informal channels.
+              The patterns that drive financial crime in Nigeria are not the same patterns that drive it elsewhere. VERA is trained on local reality — the way money actually moves across Nigerian banking, telecoms, and informal channels.
             </p>
           </div>
 
@@ -531,7 +531,7 @@ export default function LandingPage() {
                 },
                 {
                   title: 'Shell Director Webs',
-                  body: 'Businesses sharing directors, addresses, or BVNs — signals buried in CAC registrations and cross-bank data. GRACE surfaces them as connected nodes in the graph.',
+                  body: 'Businesses sharing directors, addresses, or BVNs — signals buried in CAC registrations and cross-bank data. VERA surfaces them as connected nodes in the graph.',
                   delay: '240ms',
                 },
               ].map(({ title, body, delay }) => (
@@ -568,7 +568,7 @@ export default function LandingPage() {
               className="font-display mb-4"
               style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1.15, color: '#FFFFFF', letterSpacing: '-0.02em' }}
             >
-              What GRACE gives your compliance team.
+              What VERA gives your verification team.
             </h2>
           </div>
 
@@ -576,14 +576,14 @@ export default function LandingPage() {
             {[
               {
                 icon: <IconNetwork className="w-6 h-6" style={{ color: ACCENT }} />,
-                title: 'Live Risk Graph',
+                title: 'Live Trust Graph',
                 body: 'A continuously updated relationship graph of every entity in your institution. Risk scores propagate across connections the moment new suspicious patterns are detected.',
                 delay: '0ms',
               },
               {
                 icon: <IconFileText className="w-6 h-6" style={{ color: ACCENT }} />,
                 title: 'Automated STR Drafting',
-                body: 'When suspicious patterns are confirmed, GRACE drafts an NFIU-compliant Suspicious Transaction Report automatically. Your compliance officer reviews, edits, and approves — never writes from scratch.',
+                body: 'When suspicious patterns are confirmed, VERA drafts an NFIU-compliant Suspicious Transaction Report automatically. Your verification analyst reviews, edits, and approves — never writes from scratch.',
                 delay: '80ms',
               },
               {
@@ -642,13 +642,13 @@ export default function LandingPage() {
                 Your data never leaves your walls.
               </h2>
               <p className="mb-5" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
-                GRACE deploys inside your own infrastructure — your Azure tenant, your private server, or a dedicated cloud instance we manage for you. Your transaction data is processed entirely within your environment.
+                VERA deploys inside your own infrastructure — your Azure tenant, your private server, or a dedicated cloud instance we manage for you. Your transaction data is processed entirely within your environment.
               </p>
               <p className="mb-5" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
                 We provide the software. You keep the keys.
               </p>
               <p className="mb-10" style={{ fontSize: '1rem', color: '#4B5563', lineHeight: 1.75 }}>
-                The Neo4j graph database, PostgreSQL transaction store, and GRACE detection engine run on your compute. STR reports are the only data that leave — and only to NFIU, by your compliance officer's action.
+                The Neo4j graph database, PostgreSQL transaction store, and VERA detection engine run on your compute. STR reports are the only data that leave — and only to NFIU, by your verification analyst's action.
               </p>
               <div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
@@ -680,7 +680,7 @@ export default function LandingPage() {
               className="font-display mb-5"
               style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', lineHeight: 1.15, color: '#FFFFFF', letterSpacing: '-0.02em' }}
             >
-              See the networks.<br />Stop the crime.<br />Earn the trust.
+              See the network.<br />Verify the truth.<br />Protect the system.
             </h2>
             <p className="mb-10" style={{ fontSize: '1.05rem', color: '#94A3B8', lineHeight: 1.65 }}>
               Built for Nigerian financial institutions that take compliance seriously.
@@ -724,7 +724,7 @@ export default function LandingPage() {
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.65 }}>
-                Graph-based AML intelligence for Nigeria.
+                Network-based trust verification for Nigeria.
               </p>
             </div>
 
@@ -747,7 +747,7 @@ export default function LandingPage() {
 
           <div style={{ borderTop: '1px solid #1E3358', paddingTop: '24px' }}>
             <p style={{ fontSize: '0.8rem', color: '#374151' }}>
-              © 2026 GRACE. All rights reserved.
+              © 2026 VERA — Team Veltrix. All rights reserved.
             </p>
           </div>
         </div>

@@ -67,7 +67,7 @@ export default function Login() {
       </div>
 
       <p className="text-center text-[10px] text-[#4B5563] font-mono mt-6">
-        © 2026 GRACE · NFIU-compliant · SOC2 Ready
+        © 2026 VERA · NFIU-compliant · SOC2 Ready
       </p>
     </div>
   )

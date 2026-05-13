@@ -108,14 +108,14 @@ export default function Landing() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#00D4AA]/10 border border-[#00D4AA]/30 rounded-full text-xs text-[#00D4AA] font-mono mb-6">
-              Microsoft AI Skills Week 2026 · RegTech Hackathon
+              Squad Hackathon 3.0 2026 · RegTech Hackathon
             </div>
             <h1 className="text-4xl font-bold leading-tight mb-4">
               Detect the network,<br />
               <span className="text-gradient-accent">not just the node.</span>
             </h1>
             <p className="text-[#94A3B8] text-base leading-relaxed mb-8">
-              GRACE is an enterprise AML compliance platform that maps financial relationships, detects laundering patterns, and auto-generates NFIU-compliant STRs — powered by graph intelligence and LLM.
+              VERA is an enterprise trust verification platform that maps financial relationships, detects laundering patterns, and auto-generates NFIU-compliant STRs — powered by graph intelligence and LLM.
             </p>
             <div className="flex gap-3">
               <button onClick={() => navigate('/login')} className="px-6 py-3 bg-[#00D4AA] text-[#0A0E1A] font-semibold rounded-lg hover:bg-[#00D4AA]/90 transition-colors">
@@ -152,7 +152,7 @@ export default function Landing() {
 
       {/* How it works */}
       <section className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-2xl font-bold text-center mb-10">How GRACE Works</h2>
+        <h2 className="text-2xl font-bold text-center mb-10">How VERA Works</h2>
         <div className="flex flex-col md:flex-row gap-0">
           {steps.map((s, i) => (
             <div key={s.n} className="flex-1 relative">
@@ -190,10 +190,10 @@ export default function Landing() {
       {/* Social Proof */}
       <section className="max-w-6xl mx-auto px-6 py-16 text-center">
         <div className="inline-flex items-center gap-3 px-4 py-2 bg-[#1C2333] border border-[#2D3748] rounded-full mb-6">
-          <span className="text-xs font-mono text-[#00D4AA]">Microsoft AI Skills Week 2026</span>
+          <span className="text-xs font-mono text-[#00D4AA]">Squad Hackathon 3.0 2026</span>
         </div>
         <blockquote className="text-lg text-[#94A3B8] max-w-2xl mx-auto italic">
-          "GRACE represents the next generation of RegTech — where graph intelligence meets compliance automation."
+          "VERA represents the next generation of RegTech — where graph intelligence meets compliance automation."
         </blockquote>
       </section>
 
@@ -201,7 +201,7 @@ export default function Landing() {
       <section className="bg-gradient-to-r from-[#00D4AA]/10 to-[#00A8FF]/10 border-y border-[#00D4AA]/20">
         <div className="max-w-6xl mx-auto px-6 py-16 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to detect the network?</h2>
-          <p className="text-[#94A3B8] mb-8">Join Nigerian banks and fintechs using GRACE for AML compliance.</p>
+          <p className="text-[#94A3B8] mb-8">Join Nigerian banks and fintechs using VERA for trust verification.</p>
           <button onClick={() => navigate('/login')} className="px-8 py-4 bg-[#00D4AA] text-[#0A0E1A] font-bold rounded-lg text-lg hover:bg-[#00D4AA]/90 transition-colors">
             Start Free Trial
           </button>
@@ -212,7 +212,7 @@ export default function Landing() {
       <footer className="border-t border-[#2D3748] py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <span className="text-sm font-bold">GR<span className="text-[#00D4AA]">ACE</span></span>
-          <p className="text-xs text-[#4B5563] font-mono">© 2026 GRACE · NFIU-compliant · SOC2 Ready · Microsoft AI Skills Week</p>
+          <p className="text-xs text-[#4B5563] font-mono">© 2026 VERA · NFIU-compliant · SOC2 Ready · Squad Hackathon 3.0</p>
         </div>
       </footer>
     </div>

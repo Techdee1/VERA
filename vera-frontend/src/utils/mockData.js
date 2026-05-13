@@ -25,13 +25,13 @@ export const mockSTRs = [
 ]
 
 export const mockAuditLog = [
-  { id: 'AUD-001', timestamp: '2026-04-14T10:05:00Z', action: 'STR_GENERATED', target: 'STR-001', targetType: 'STR', user: 'GRACE AI', hash: 'a3f9c2d1e8b7...', verified: true },
-  { id: 'AUD-002', timestamp: '2026-04-14T09:41:00Z', action: 'ALERT_CREATED', target: 'ALT-001', targetType: 'ALERT', user: 'GRACE Engine', hash: 'b4e0d3c2f9a8...', verified: true },
+  { id: 'AUD-001', timestamp: '2026-04-14T10:05:00Z', action: 'STR_GENERATED', target: 'STR-001', targetType: 'STR', user: 'VERA AI', hash: 'a3f9c2d1e8b7...', verified: true },
+  { id: 'AUD-002', timestamp: '2026-04-14T09:41:00Z', action: 'ALERT_CREATED', target: 'ALT-001', targetType: 'ALERT', user: 'VERA Engine', hash: 'b4e0d3c2f9a8...', verified: true },
   { id: 'AUD-003', timestamp: '2026-04-14T09:00:00Z', action: 'ENTITY_VIEWED', target: 'ENT-001', targetType: 'ENTITY', user: 'Akeem Jr.', hash: 'c5f1e4d3g0b9...', verified: true },
   { id: 'AUD-004', timestamp: '2026-04-13T20:30:00Z', action: 'STR_FILED', target: 'STR-002', targetType: 'STR', user: 'Akeem Jr.', hash: 'd6g2f5e4h1c0...', verified: true },
   { id: 'AUD-005', timestamp: '2026-04-13T18:05:00Z', action: 'ALERT_STATUS_CHANGED', target: 'ALT-004', targetType: 'ALERT', user: 'Akeem Jr.', hash: 'e7h3g6f5i2d1...', verified: true },
   { id: 'AUD-006', timestamp: '2026-04-13T14:20:00Z', action: 'ALERT_DISMISSED', target: 'ALT-005', targetType: 'ALERT', user: 'Akeem Jr.', hash: 'f8i4h7g6j3e2...', verified: true },
-  { id: 'AUD-007', timestamp: '2026-04-12T10:10:00Z', action: 'ALERT_CREATED', target: 'ALT-006', targetType: 'ALERT', user: 'GRACE Engine', hash: 'g9j5i8h7k4f3...', verified: true },
+  { id: 'AUD-007', timestamp: '2026-04-12T10:10:00Z', action: 'ALERT_CREATED', target: 'ALT-006', targetType: 'ALERT', user: 'VERA Engine', hash: 'g9j5i8h7k4f3...', verified: true },
   { id: 'AUD-008', timestamp: '2026-04-12T08:00:00Z', action: 'USER_LOGIN', target: 'Akeem Jr.', targetType: 'USER', user: 'Akeem Jr.', hash: 'h0k6j9i8l5g4...', verified: true },
 ]
 
