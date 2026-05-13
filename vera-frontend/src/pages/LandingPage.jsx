@@ -521,7 +521,7 @@ export default function LandingPage() {
                 },
                 {
                   title: 'Agent Banking Chains',
-                  body: 'Funds split across dozens of mobile money agents in micro-transactions — each leg looking routine, the chain invisible without a network view. A pattern unique to Nigeria's agent banking infrastructure.',
+                  body: 'Funds split across dozens of mobile money agents in micro-transactions — each leg looking routine, the chain invisible without a network view. A pattern unique to Nigeria\'s agent banking infrastructure.',
                   delay: '80ms',
                 },
                 {
