@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
 import { AlertTimeline } from '@/components/alerts/AlertTimeline'
+import { AlertExplainability } from '@/components/alerts/AlertExplainability'
 import { useGraphLayout } from '@/components/graph/useGraphLayout'
 import { useGraphData } from '@/hooks/useGraphData'
 import { useAlert } from '@/hooks/useAlerts'
@@ -156,6 +157,9 @@ export default function AlertDetail() {
           <p className="text-xs text-[#4B5563]">Risk Score</p>
         </div>
       </div>
+
+      {/* AI Explainability */}
+      <AlertExplainability alert={alert} />
 
       {/* Graph + Entity IDs */}
       <div className="grid lg:grid-cols-2 gap-4 mb-4">

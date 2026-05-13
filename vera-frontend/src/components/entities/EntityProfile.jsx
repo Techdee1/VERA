@@ -20,13 +20,33 @@ export function EntityProfile({ entity }) {
         {entity.bvn && (
           <div>
             <p className="text-[#4B5563] text-xs uppercase tracking-wider mb-1">BVN</p>
-            <p className="text-[#F7F9FC] font-mono">{entity.bvn}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[#F7F9FC] font-mono">{entity.bvn}</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-green-400 font-medium">✓ Verified</span>
+            </div>
           </div>
         )}
         {entity.nin && (
           <div>
             <p className="text-[#4B5563] text-xs uppercase tracking-wider mb-1">NIN</p>
-            <p className="text-[#F7F9FC] font-mono">{entity.nin}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[#F7F9FC] font-mono">{entity.nin}</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-green-400 font-medium">✓ Verified</span>
+            </div>
+          </div>
+        )}
+        {entity.business_reg_no && (
+          <div>
+            <p className="text-[#4B5563] text-xs uppercase tracking-wider mb-1">CAC Reg No.</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-[#F7F9FC] font-mono text-xs">{entity.business_reg_no}</p>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-green-400 font-medium">✓ Registered</span>
+            </div>
+          </div>
+        )}
+        {!entity.bvn && !entity.nin && (
+          <div className="col-span-2">
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 font-medium">⚠ Identity documents not verified</span>
           </div>
         )}
         <div>

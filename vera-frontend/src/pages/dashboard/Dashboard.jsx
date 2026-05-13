@@ -8,6 +8,7 @@ import { SquadFeed } from '@/components/dashboard/SquadFeed'
 import { useAlerts } from '@/hooks/useAlerts'
 import { useEntityTotal } from '@/hooks/useEntities'
 import { useSTRs } from '@/hooks/useSTR'
+import { useResponsibleAiMetrics } from '@/hooks/useResponsibleAi'
 import { Spinner } from '@/components/ui/Spinner'
 
 export default function Dashboard() {
@@ -15,20 +16,27 @@ export default function Dashboard() {
   const { data: alerts, isLoading: alertsLoading } = useAlerts()
   const { data: entityTotal, isLoading: entityLoading } = useEntityTotal()
   const { data: strs } = useSTRs()
+  const { data: aiMetrics } = useResponsibleAiMetrics()
 
   const openAlerts = (alerts ?? []).filter((a) => a.status === 'OPEN').length
+  const highRiskAlerts = (alerts ?? []).filter((a) => a.riskScore >= 0.7)
 
   const recentAlerts = (alerts ?? []).filter(
     (a) => new Date(a.detectedAt) > new Date(Date.now() - 86_400_000)
   )
 
   const highRiskIds = new Set(
-    (alerts ?? [])
-      .filter((a) => a.riskScore >= 0.7)
-      .flatMap((a) => a.entityIds ?? [])
+    highRiskAlerts.flatMap((a) => a.entityIds ?? [])
   )
 
   const approvedStrs = (strs ?? []).filter((s) => s.decision === 'approved').length
+
+  const topRisk = highRiskAlerts.length > 0
+    ? Math.max(...highRiskAlerts.map((a) => a.riskScore))
+    : null
+
+  const falsePositiveRate = aiMetrics?.false_positive_rate ?? null
+  const modelFeatures = aiMetrics?.model_feature_list ?? []
 
   return (
     <div>
@@ -44,6 +52,30 @@ export default function Dashboard() {
           </button>
         }
       />
+
+      {/* VERA Trust Intelligence Banner */}
+      {!alertsLoading && openAlerts > 0 && (
+        <div className="mb-5 bg-red-500/5 border border-red-500/20 rounded-lg p-4 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+            <span className="text-red-400 text-lg font-bold">!</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[#F7F9FC]">
+              {openAlerts} active fraud {openAlerts === 1 ? 'pattern' : 'patterns'} detected
+              {topRisk && <span className="text-red-400 ml-2 font-mono">· highest risk {(topRisk * 100).toFixed(0)}%</span>}
+            </p>
+            <p className="text-xs text-[#94A3B8] mt-0.5">
+              {highRiskIds.size} entities flagged · VERA is monitoring {entityTotal ?? '…'} entities in real time
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/alerts')}
+            className="text-xs text-red-400 border border-red-500/30 rounded-md px-3 py-1.5 hover:bg-red-500/10 transition-colors shrink-0"
+          >
+            Review alerts →
+          </button>
+        </div>
+      )}
 
       {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -103,6 +135,38 @@ export default function Dashboard() {
       <div className="mb-6">
         <SquadFeed />
       </div>
+
+      {/* Responsible AI strip */}
+      {aiMetrics && (
+        <div className="mb-6 bg-[#111827] border border-[#2D3748] rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium">VERA Responsible AI</p>
+            <button onClick={() => navigate('/responsible-ai')} className="text-xs text-[#00D4AA] hover:underline">
+              Full metrics →
+            </button>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="bg-[#1C2333] rounded-lg p-3 text-center">
+              <p className="text-lg font-bold font-mono text-[#00D4AA]">
+                {falsePositiveRate !== null ? `${(falsePositiveRate * 100).toFixed(1)}%` : '—'}
+              </p>
+              <p className="text-[10px] text-[#4B5563] mt-1 uppercase tracking-wider">False Positive Rate</p>
+            </div>
+            <div className="bg-[#1C2333] rounded-lg p-3 text-center">
+              <p className="text-lg font-bold font-mono text-[#F7F9FC]">{aiMetrics.alerts_raised_total ?? 0}</p>
+              <p className="text-[10px] text-[#4B5563] mt-1 uppercase tracking-wider">Alerts Raised</p>
+            </div>
+            <div className="bg-[#1C2333] rounded-lg p-3 text-center">
+              <p className="text-lg font-bold font-mono text-[#F7F9FC]">{aiMetrics.alerts_reviewed_total ?? 0}</p>
+              <p className="text-[10px] text-[#4B5563] mt-1 uppercase tracking-wider">Human Reviews</p>
+            </div>
+            <div className="bg-[#1C2333] rounded-lg p-3 text-center">
+              <p className="text-lg font-bold font-mono text-amber-400">{modelFeatures.length}</p>
+              <p className="text-[10px] text-[#4B5563] mt-1 uppercase tracking-wider">Model Features</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recent Alerts */}
       <div className="bg-[#111827] border border-[#2D3748] rounded-lg p-4">

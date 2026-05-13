@@ -82,6 +82,32 @@ async def verify_squad_signature(request: Request, x_squad_signature: str = Head
     
     return body
 
+@router.post("/squad/simulate", status_code=202)
+async def simulate_squad_webhook():
+    """
+    Demo endpoint — fires a synthetic Squad payment through the full VERA pipeline
+    without requiring HMAC verification. For live demos only.
+    """
+    import random, string
+    ref = "DEMO-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=12))
+    amount = random.choice([450000, 975000, 1250000, 2800000, 500000])
+    payload = {
+        "Event": "charge.success",
+        "Body": {
+            "transaction_ref": ref,
+            "amount": amount,
+            "currency": "NGN",
+            "sender_id": f"DEMO-SENDER-{random.randint(1,5):02d}",
+            "receiver_id": f"DEMO-RECEIVER-{random.randint(1,5):02d}",
+            "sender_name": random.choice(["Musa Lawal", "Fatima Onyeka", "Chidi Okafor", "Amaka Bello", "Tunde Adeyemi"]),
+            "receiver_name": random.choice(["Shell Co Alpha Ltd", "Zenith Transfers Ltd", "Quick Cash Services", "Alpha Remit Ltd"]),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        },
+    }
+    asyncio.create_task(process_squad_webhook(payload))
+    return {"status": "success", "message": "Simulated Squad transaction injected", "reference": ref, "amount": amount}
+
+
 @router.post("/squad", status_code=202)
 async def squad_webhook(
     body: bytes = Depends(verify_squad_signature)

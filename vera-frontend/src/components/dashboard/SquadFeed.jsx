@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
 import { formatNaira } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner'
@@ -29,27 +30,64 @@ function truncate(str, maxLen) {
 }
 
 export function SquadFeed() {
+  const queryClient = useQueryClient()
+  const [simulating, setSimulating] = useState(false)
+  const [lastSim, setLastSim] = useState(null)
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['recent-transactions'],
     queryFn: () => apiClient.get('/transactions/recent').then(r => r.data),
-    refetchInterval: 10000,
-    staleTime: 8000,
+    refetchInterval: 8000,
+    staleTime: 6000,
   })
 
   const transactions = Array.isArray(data) ? data : data?.transactions ?? []
 
+  async function handleSimulate() {
+    setSimulating(true)
+    try {
+      const res = await apiClient.post('/webhooks/squad/simulate').then(r => r.data)
+      setLastSim(res)
+      // Refresh feed after a short delay to let the worker process it
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['recent-transactions'] })
+        queryClient.invalidateQueries({ queryKey: ['alerts'] })
+      }, 2500)
+    } catch {
+      // silent — demo mode
+    } finally {
+      setSimulating(false)
+    }
+  }
+
   return (
     <div className="bg-[#111827] border border-[#2D3748] rounded-lg overflow-hidden">
-      <div className="px-4 py-3 border-b border-[#2D3748] flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-[#2D3748] flex items-center gap-3">
         <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium">Squad Live Feed</p>
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <div className="ml-auto flex items-center gap-2">
+          {lastSim && (
+            <span className="text-[10px] text-green-400 font-mono">
+              ✓ {lastSim.reference} injected
+            </span>
+          )}
+          <button
+            onClick={handleSimulate}
+            disabled={simulating}
+            className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+          >
+            {simulating ? (
+              <><span className="w-2.5 h-2.5 border border-blue-400 border-t-transparent rounded-full animate-spin" /> Injecting…</>
+            ) : (
+              <>⚡ Simulate Squad Transaction</>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="divide-y divide-[#2D3748] max-h-[400px] overflow-y-auto">
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <Spinner />
-          </div>
+          <div className="flex justify-center py-8"><Spinner /></div>
         ) : isError ? (
           <div className="px-4 py-8 text-center">
             <p className="text-sm text-red-400">Feed unavailable. Check connection.</p>
@@ -57,14 +95,13 @@ export function SquadFeed() {
         ) : transactions.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <p className="text-sm text-[#94A3B8] mb-2">Waiting for Squad transactions.</p>
-            <p className="text-xs text-[#4B5563]">Webhook is listening.</p>
-            <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse mt-2" />
+            <p className="text-xs text-[#4B5563]">Webhook is listening. Click Simulate to test.</p>
           </div>
         ) : (
           transactions.slice(0, 8).map((txn) => {
             const riskScore = parseFloat(txn.risk_score ?? txn.riskScore ?? 0)
             const borderColor = getRiskColor(riskScore)
-            const isSquad = txn.channel === 'squad_payment'
+            const isSquad = txn.channel === 'squad' || txn.channel === 'squad_payment'
             const senderName = txn.from_entity_name ?? txn.fromEntityName ?? txn.fromEntity ?? txn.from_entity ?? txn.id
             const receiverName = txn.to_entity_name ?? txn.toEntityName ?? txn.toEntity ?? txn.to_entity ?? '—'
             const timestamp = txn.date ?? txn.created_at ?? txn.createdAt
@@ -78,9 +115,7 @@ export function SquadFeed() {
                     <span className="text-sm text-[#F7F9FC] truncate">{truncate(receiverName, 20)}</span>
                   </div>
                   {isSquad && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2 shrink-0">
-                      Squad
-                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2 shrink-0">Squad</span>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
