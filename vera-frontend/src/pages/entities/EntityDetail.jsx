@@ -3,8 +3,10 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { EntityProfile } from '@/components/entities/EntityProfile'
 import { AlertCard } from '@/components/alerts/AlertCard'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
+import { TransactionList } from '@/components/entities/TransactionList'
 import { useEntity } from '@/hooks/useEntities'
 import { useAlerts } from '@/hooks/useAlerts'
+import { useTransactionsByEntity } from '@/hooks/useTransactions'
 import { Spinner } from '@/components/ui/Spinner'
 import { EntityTrustScoreCard } from '@/components/entities/EntityTrustScoreCard'
 import { formatNairaShort } from '@/utils/formatters'
@@ -15,6 +17,7 @@ export default function EntityDetail() {
   const navigate = useNavigate()
   const { data: entity, isLoading } = useEntity(id)
   const { data: alerts } = useAlerts()
+  const { data: transactions, isLoading: txLoading } = useTransactionsByEntity(id)
 
   if (isLoading) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>
   if (!entity) return <div className="text-center py-16 text-[#4B5563]">Entity not found</div>
@@ -107,6 +110,17 @@ export default function EntityDetail() {
           </div>
         </div>
       )}
+
+      {/* Transactions */}
+      <div className="bg-[#111827] border border-[#2D3748] rounded-lg mb-4 overflow-hidden">
+        <div className="px-4 py-2 border-b border-[#2D3748] flex items-center justify-between">
+          <p className="text-xs text-[#4B5563] uppercase tracking-wider">Transactions</p>
+          {transactions && <span className="text-xs text-[#4B5563]">{transactions.length} records</span>}
+        </div>
+        <div className="p-2">
+          <TransactionList transactions={transactions} isLoading={txLoading} showEntityLinks />
+        </div>
+      </div>
 
       {linkedAlerts.length > 0 && (
         <div>

@@ -1,13 +1,15 @@
 from uuid import UUID
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.deps import get_db
 from app.models import STRDraft
 from app.models.enums import DecisionStatus
-from app.schemas.str_drafts import STRDecisionUpdate, STRDraftResponse, STRGenerateRequest, STRListResponse
+from app.schemas.str_drafts import STRDecisionUpdate, STRDraftResponse, STRFileResponse, STRGenerateRequest, STRListResponse
 from app.services.audit_service import write_audit_event
 from app.services.str_service import STRGenerationError, generate_str_draft, get_str_draft
 
@@ -93,3 +95,61 @@ def fetch_str(
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="STR draft not found")
     return row
+
+
+@router.post("/str/{str_id}/file", response_model=STRFileResponse)
+def file_str(
+    str_id: UUID,
+    db: Session = Depends(get_db),
+) -> STRFileResponse:
+    """Initiate Squad payment to file the STR and record the transaction reference."""
+    draft = db.scalar(select(STRDraft).where(STRDraft.id == str_id))
+    if draft is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="STR draft not found")
+    if draft.decision != DecisionStatus.approved:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Only approved STR drafts can be filed",
+        )
+
+    squad_ref: str | None = None
+    if settings.squad_secret_key:
+        try:
+            payload = {
+                "amount": 100,  # nominal filing fee in kobo
+                "currency": "NGN",
+                "email": "compliance@vera.ng",
+                "transaction_ref": f"STR-FILE-{str_id}",
+                "description": f"VERA STR filing: {str_id}",
+            }
+            headers = {"Authorization": f"Bearer {settings.squad_secret_key}"}
+            with httpx.Client(timeout=15.0) as client:
+                resp = client.post(
+                    f"{settings.squad_api_base_url}/transaction/initiate",
+                    json=payload,
+                    headers=headers,
+                )
+            if resp.status_code < 400:
+                squad_ref = resp.json().get("data", {}).get("transaction_ref") or f"STR-FILE-{str_id}"
+        except Exception:
+            squad_ref = f"STR-FILE-{str_id}-OFFLINE"
+    else:
+        squad_ref = f"STR-FILE-{str_id}-NO-SQUAD"
+
+    # Persist the Squad reference on the draft via metadata
+    meta = dict(draft.content_json or {})
+    meta["squad_transaction_ref"] = squad_ref
+    draft.content_json = meta
+
+    write_audit_event(
+        db=db,
+        action="str_filed",
+        entity_ids=[],
+        alert_id=draft.alert_id,
+        model_version=draft.model_version,
+        decision=DecisionStatus.approved,
+        payload_json={"str_id": str(str_id), "squad_transaction_ref": squad_ref},
+    )
+    db.commit()
+
+    return STRFileResponse(str_id=str_id, squad_transaction_ref=squad_ref, status="filed")

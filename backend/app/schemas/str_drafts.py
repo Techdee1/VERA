@@ -32,3 +32,9 @@ class STRDraftResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class STRFileResponse(BaseModel):
+    str_id: UUID
+    squad_transaction_ref: str
+    status: str

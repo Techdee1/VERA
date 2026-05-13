@@ -2,18 +2,21 @@ import { NavLink } from 'react-router-dom'
 import {
   Squares2X2Icon, ChartBarIcon, BellAlertIcon, UserGroupIcon,
   DocumentTextIcon, ClipboardDocumentListIcon, Cog6ToothIcon, XMarkIcon,
+  ArrowsRightLeftIcon, SignalIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/utils/cn'
 import { useUIStore } from '@/store/uiStore'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const navItems = [
-  { to: '/dashboard', icon: Squares2X2Icon,           label: 'Dashboard' },
-  { to: '/graph',     icon: ChartBarIcon,              label: 'Graph Explorer' },
-  { to: '/alerts',    icon: BellAlertIcon,             label: 'Alerts' },
-  { to: '/entities',  icon: UserGroupIcon,             label: 'Entities' },
-  { to: '/str',       icon: DocumentTextIcon,          label: 'STR Reports' },
-  { to: '/audit',     icon: ClipboardDocumentListIcon, label: 'Audit Log' },
+  { to: '/dashboard',     icon: Squares2X2Icon,           label: 'Dashboard' },
+  { to: '/graph',         icon: ChartBarIcon,              label: 'Graph Explorer' },
+  { to: '/alerts',        icon: BellAlertIcon,             label: 'Alerts' },
+  { to: '/entities',      icon: UserGroupIcon,             label: 'Entities' },
+  { to: '/transactions',  icon: ArrowsRightLeftIcon,       label: 'Transactions' },
+  { to: '/squad',         icon: SignalIcon,                label: 'Squad Monitor' },
+  { to: '/str',           icon: DocumentTextIcon,          label: 'STR Reports' },
+  { to: '/audit',         icon: ClipboardDocumentListIcon, label: 'Audit Log' },
 ]
 
 function SidebarContent({ onClose }) {

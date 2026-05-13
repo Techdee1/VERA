@@ -13,6 +13,8 @@ import EntityDetail from '@/pages/entities/EntityDetail'
 import GraphExplorer from '@/pages/graph/GraphExplorer'
 import STRIndex from '@/pages/str/STRIndex'
 import STRDetail from '@/pages/str/STRDetail'
+import TransactionsIndex from '@/pages/transactions/TransactionsIndex'
+import SquadMonitor from '@/pages/squad/SquadMonitor'
 import AuditLog from '@/pages/audit/AuditLog'
 import Settings from '@/pages/settings/Settings'
 import NotFound from '@/pages/NotFound'
@@ -35,6 +37,8 @@ export const router = createBrowserRouter([
       { path: '/alerts/:id', element: <AlertDetail /> },
       { path: '/entities', element: <EntitiesIndex /> },
       { path: '/entities/:id', element: <EntityDetail /> },
+      { path: '/transactions', element: <TransactionsIndex /> },
+      { path: '/squad', element: <SquadMonitor /> },
       { path: '/str', element: <STRIndex /> },
       { path: '/str/:id', element: <STRDetail /> },
       { path: '/audit', element: <AuditLog /> },

@@ -15,12 +15,13 @@ import { generateSTRPdf } from '@/utils/generateSTRPdf'
 import { toast } from '@/store/toastStore'
 import { Spinner } from '@/components/ui/Spinner'
 import { Download } from 'lucide-react'
+import { ExclamationCircleIcon } from '@heroicons/react/24/outline'
 
 export default function STRDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: str, isLoading } = useSTR(id)
+  const { data: str, isLoading, isError } = useSTR(id)
   const { data: alert } = useAlert(str?.alertId)
   const [approveModal, setApproveModal] = useState(false)
   const [rejectModal, setRejectModal] = useState(false)
@@ -36,12 +37,18 @@ export default function STRDetail() {
       enabled: Boolean(entityId),
     })),
   })
-  const entities = entityQueries.map((query) => query.data).filter(Boolean)
+  const entities = entityQueries.map((q) => q.data).filter(Boolean)
 
   if (isLoading) return <div className="flex justify-center py-16"><Spinner size="lg" /></div>
-  if (!str) return <div className="text-center py-16 text-[#4B5563]">STR not found</div>
-
-  const isPending = str.decision === 'pending'
+  if (isError || !str) return (
+    <div className="flex flex-col items-center py-16 gap-3">
+      <ExclamationCircleIcon className="w-10 h-10 text-red-400" />
+      <p className="text-sm text-red-400">STR not found or failed to load</p>
+      <button onClick={() => navigate('/str')} className="text-xs text-[#00D4AA] hover:underline">
+        ← Back to STR Reports
+      </button>
+    </div>
+  )
 
   const handleDownloadPDF = () => {
     try {
@@ -57,22 +64,29 @@ export default function STRDetail() {
     try {
       await strApi.updateDecision(str.id, 'approved')
       await queryClient.invalidateQueries({ queryKey: ['str', id] })
+      await queryClient.invalidateQueries({ queryKey: ['strs'] })
       setApproveModal(false)
-      toast.success(`${str.id} filed successfully with NFIU`)
-    } catch {
-      toast.error('Failed to approve STR — please try again')
+      toast.success(`STR ${str.id} approved`)
+    } catch (err) {
+      const detail = err?.response?.data?.detail
+      toast.error(typeof detail === 'string' ? detail : 'Failed to approve STR — please try again')
     } finally {
       setDecisionLoading(false)
     }
   }
 
   const handleReject = async () => {
+    if (!rejectReason.trim()) {
+      toast.error('Please provide a rejection reason')
+      return
+    }
     setDecisionLoading(true)
     try {
       await strApi.updateDecision(str.id, 'rejected')
       await queryClient.invalidateQueries({ queryKey: ['str', id] })
+      await queryClient.invalidateQueries({ queryKey: ['strs'] })
       setRejectModal(false)
-      toast.error(`${str.id} rejected`)
+      toast.info(`STR ${str.id} rejected`)
       navigate('/str')
     } catch {
       toast.error('Failed to reject STR — please try again')
@@ -83,14 +97,18 @@ export default function STRDetail() {
 
   return (
     <div>
-      <PageHeader backTo="/str" title={`STR ${str.id}`} subtitle={`Alert: ${str.alertId}`} />
+      <PageHeader
+        backTo="/str"
+        title={`STR ${str.id.slice(0, 8)}…`}
+        subtitle={`Alert: ${str.alertId}`}
+      />
 
-      {/* Squad Transaction Reference */}
-      {str.squad_transaction_ref && (
+      {/* Squad filing banner */}
+      {str.squadRef && (
         <div className="mb-4 flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold">S</span>
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold shrink-0">S</span>
           <span className="text-sm text-green-400 font-medium">Filed via Squad</span>
-          <span className="text-xs text-[#94A3B8] font-mono">{str.squad_transaction_ref}</span>
+          <span className="text-xs text-[#94A3B8] font-mono truncate">{str.squadRef}</span>
         </div>
       )}
 
@@ -100,28 +118,34 @@ export default function STRDetail() {
           <AuditTrail strId={str.id} />
         </div>
         <div className="lg:col-span-2">
-          <STREditor content={str.draftContent} readOnly={!isPending} />
+          <STREditor content={str.draftContent} readOnly={!str.isPending} />
         </div>
       </div>
 
-      {isPending ? (
+      {/* Action bar */}
+      {str.isPending ? (
         <div className="flex flex-wrap gap-3">
           <Button variant="outline" onClick={handleDownloadPDF} disabled={decisionLoading}>
             <Download size={16} />
             Download PDF
           </Button>
-          <Button variant="primary" onClick={() => setApproveModal(true)} disabled={decisionLoading}>Approve & File</Button>
-          <Button variant="secondary" onClick={() => toast.info('Changes requested — awaiting revision')} disabled={decisionLoading}>Request Changes</Button>
-          <Button variant="danger" onClick={() => setRejectModal(true)} disabled={decisionLoading}>Reject</Button>
+          <Button variant="primary" onClick={() => setApproveModal(true)} disabled={decisionLoading}>
+            Approve
+          </Button>
+          <Button variant="danger" onClick={() => setRejectModal(true)} disabled={decisionLoading}>
+            Reject
+          </Button>
         </div>
-      ) : str.decision === 'approved' ? (
+      ) : str.status === 'APPROVED' ? (
         <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-          <span className="text-green-400 text-sm font-medium">✓ STR filed successfully with NFIU</span>
+          <span className="text-green-400 text-sm font-medium">✓ STR approved</span>
           <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
             <Download size={14} />
             Download PDF
           </Button>
-          <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">Back to STRs →</button>
+          <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">
+            Back to STRs →
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -130,37 +154,43 @@ export default function STRDetail() {
             <Download size={14} />
             Download PDF
           </Button>
-          <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">Back to STRs →</button>
+          <button onClick={() => navigate('/str')} className="ml-auto text-xs text-[#94A3B8] hover:text-[#F7F9FC]">
+            Back to STRs →
+          </button>
         </div>
       )}
 
-      <Modal open={approveModal} onClose={() => setApproveModal(false)} title="Approve & File STR">
+      {/* Approve modal */}
+      <Modal open={approveModal} onClose={() => !decisionLoading && setApproveModal(false)} title="Approve STR">
         <p className="text-sm text-[#94A3B8] mb-4">
-          You are about to file <strong className="text-[#F7F9FC]">{str.id}</strong> with the NFIU. This action is irreversible and will be recorded in the audit trail.
+          You are approving <strong className="text-[#F7F9FC]">{str.id}</strong>. This will be recorded in the audit trail.
         </p>
-        <div className="bg-[#1C2333] border border-[#2D3748] rounded-md p-3 mb-4">
-          <p className="text-[10px] text-[#4B5563] font-mono break-all">Payload Hash: {str.payloadHash}</p>
-        </div>
+        {str.payloadHash && (
+          <div className="bg-[#1C2333] border border-[#2D3748] rounded-md p-3 mb-4">
+            <p className="text-[10px] text-[#4B5563] font-mono break-all">Hash: {str.payloadHash}</p>
+          </div>
+        )}
         <div className="flex gap-2 justify-end">
           <Button variant="ghost" onClick={() => setApproveModal(false)} disabled={decisionLoading}>Cancel</Button>
-          <Button variant="primary" onClick={handleApprove} disabled={decisionLoading}>
-            {decisionLoading ? 'Filing…' : 'Confirm & File'}
+          <Button variant="primary" onClick={handleApprove} loading={decisionLoading}>
+            {decisionLoading ? 'Approving…' : 'Confirm Approve'}
           </Button>
         </div>
       </Modal>
 
-      <Modal open={rejectModal} onClose={() => setRejectModal(false)} title="Reject STR">
-        <p className="text-sm text-[#94A3B8] mb-4">Provide a reason for rejecting this STR draft.</p>
+      {/* Reject modal */}
+      <Modal open={rejectModal} onClose={() => !decisionLoading && setRejectModal(false)} title="Reject STR">
+        <p className="text-sm text-[#94A3B8] mb-3">Provide a reason for rejecting this STR draft.</p>
         <textarea
           rows={3}
           value={rejectReason}
           onChange={(e) => setRejectReason(e.target.value)}
-          placeholder="Rejection reason..."
-          className="w-full bg-[#1C2333] border border-[#2D3748] rounded-md p-3 text-sm text-[#F7F9FC] placeholder:text-[#4B5563] focus:outline-none resize-none mb-4"
+          placeholder="Rejection reason (required)…"
+          className="w-full bg-[#1C2333] border border-[#2D3748] rounded-md p-3 text-sm text-[#F7F9FC] placeholder:text-[#4B5563] focus:outline-none focus:border-[#00D4AA]/50 resize-none mb-4"
         />
         <div className="flex gap-2 justify-end">
           <Button variant="ghost" onClick={() => setRejectModal(false)} disabled={decisionLoading}>Cancel</Button>
-          <Button variant="danger" onClick={handleReject} disabled={decisionLoading}>
+          <Button variant="danger" onClick={handleReject} loading={decisionLoading}>
             {decisionLoading ? 'Rejecting…' : 'Reject STR'}
           </Button>
         </div>
