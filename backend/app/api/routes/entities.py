@@ -27,12 +27,23 @@ router = APIRouter()
 def list_entities(
     limit: int = Query(default=200, ge=1, le=1000),
     offset: int = Query(default=0, ge=0),
+    q: str | None = Query(default=None, max_length=200),
     db: Session = Depends(get_db),
 ) -> EntityListResponse:
-    total = db.scalar(select(func.count()).select_from(Entity)) or 0
-    rows = db.scalars(
-        select(Entity).order_by(desc(Entity.created_at)).limit(limit).offset(offset)
-    ).all()
+    stmt = select(Entity)
+    if q:
+        term = f"%{q.strip()}%"
+        stmt = stmt.where(
+            or_(
+                Entity.full_name.ilike(term),
+                Entity.bvn.ilike(term),
+                Entity.nin.ilike(term),
+                Entity.business_reg_no.ilike(term),
+            )
+        )
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    total = db.scalar(count_stmt) or 0
+    rows = db.scalars(stmt.order_by(desc(Entity.created_at)).limit(limit).offset(offset)).all()
     return EntityListResponse(
         items=[
             EntityListItem(

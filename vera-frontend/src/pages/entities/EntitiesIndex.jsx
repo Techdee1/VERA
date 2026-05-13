@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { DataTable } from '@/components/ui/DataTable'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { Badge } from '@/components/ui/Badge'
-import { useEntities } from '@/hooks/useEntities'
-import { formatDate } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner'
+import { useEntities, useEntitySearch } from '@/hooks/useEntities'
+import { formatDate } from '@/utils/formatters'
 
 const columns = [
   { accessorKey: 'riskLevel', header: 'Risk', cell: ({ getValue }) => <RiskBadge level={getValue()} /> },
@@ -28,27 +28,37 @@ const columns = [
 
 export default function EntitiesIndex() {
   const navigate = useNavigate()
-  const { data: entities, isLoading } = useEntities()
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('')
 
+  // Debounce search input by 300ms
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search.trim()), 300)
+    return () => clearTimeout(t)
+  }, [search])
+
+  const isSearching = debouncedSearch.length >= 2
+
+  const { data: allEntities, isLoading: loadingAll } = useEntities()
+  const { data: searchResults, isLoading: loadingSearch } = useEntitySearch(debouncedSearch)
+
+  const entities = isSearching ? (searchResults ?? []) : (allEntities ?? [])
+  const isLoading = isSearching ? loadingSearch : loadingAll
+
   const filtered = useMemo(() => {
-    if (!entities) return []
-    return entities.filter((e) => {
-      if (typeFilter && e.entityType !== typeFilter) return false
-      if (search && !e.canonicalName.toLowerCase().includes(search.toLowerCase()) && !e.id.includes(search)) return false
-      return true
-    })
-  }, [entities, search, typeFilter])
+    if (!typeFilter) return entities
+    return entities.filter((e) => e.entityType === typeFilter)
+  }, [entities, typeFilter])
 
   return (
     <div>
-      <PageHeader title="Entities" subtitle={`${filtered.length} entities`} />
+      <PageHeader title="Entities" subtitle={`${filtered.length} entities${isSearching ? ' matching search' : ''}`} />
 
       <div className="flex flex-wrap gap-3 p-4 bg-[#111827] border border-[#2D3748] rounded-lg mb-4">
         <input
           type="text"
-          placeholder="Search by name or ID..."
+          placeholder="Search by name, BVN, NIN, or company reg..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="bg-[#1C2333] border border-[#2D3748] rounded-md px-3 py-1.5 text-sm text-[#F7F9FC] placeholder:text-[#4B5563] focus:outline-none focus:border-[#00D4AA]/50 font-mono flex-1 min-w-48"
@@ -67,6 +77,8 @@ export default function EntitiesIndex() {
 
       {isLoading ? (
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
+      ) : filtered.length === 0 && isSearching ? (
+        <div className="text-center py-16 text-[#4B5563] text-sm">No entities found for &quot;{debouncedSearch}&quot;</div>
       ) : (
         <DataTable data={filtered} columns={columns} onRowClick={(row) => navigate(`/entities/${row.id}`)} />
       )}

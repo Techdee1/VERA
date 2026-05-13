@@ -88,3 +88,18 @@ export function useEntityRisk(id) {
     staleTime: 30_000,
   })
 }
+
+// Server-side search — only fires when q has content
+export function useEntitySearch(q) {
+  return useQuery({
+    queryKey: ['entities-search', q],
+    queryFn: async () => {
+      const data = await entitiesApi.getAll(50, 0, q)
+      const items = data.items ?? data
+      if (!Array.isArray(items)) return []
+      return items.map(normaliseEntity)
+    },
+    enabled: !!q && q.trim().length >= 2,
+    staleTime: 30_000,
+  })
+}
