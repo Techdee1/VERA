@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
+import { useAlerts } from '@/hooks/useAlerts'
 import { formatNaira } from '@/utils/formatters'
 import { Spinner } from '@/components/ui/Spinner'
 
@@ -38,79 +39,80 @@ const STEP_LABELS = [
 
 export function SquadFeed() {
   const queryClient = useQueryClient()
-  const [simStep, setSimStep] = useState(0) // 0 = idle, 1-4 = in progress, 5 = analyzing, -1 = done
+  const [simStep, setSimStep] = useState(0) // 0 = idle, 1-4 = steps, 5 = analyzing, -1 = done
   const [toast, setToast] = useState(null)
   const prevAlertCountRef = useRef(null)
-  const fastPollEndRef = useRef(null)
   const stepTimerRef = useRef(null)
+  const pollTimerRef = useRef(null)
 
   const isSimulating = simStep > 0 && simStep <= 5
 
-  // Tighten alert polling for 30s post-simulation
-  const { data: alertsData } = useQuery({
-    queryKey: ['alerts'],
-    queryFn: () => apiClient.get('/alerts').then(r => r.data),
-    refetchInterval: fastPollEndRef.current && Date.now() < fastPollEndRef.current ? 3000 : 15000,
-  })
+  // Use shared, normalised alerts hook — safe for all components
+  const { data: alerts = [] } = useAlerts()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['recent-transactions'],
     queryFn: () => apiClient.get('/transactions/recent').then(r => r.data),
-    refetchInterval: fastPollEndRef.current && Date.now() < fastPollEndRef.current ? 2000 : 8000,
-    staleTime: 1500,
+    refetchInterval: 8000,
+    staleTime: 6000,
   })
 
   const transactions = Array.isArray(data) ? data : data?.transactions ?? []
 
   // Detect new alert after simulation
   useEffect(() => {
-    const alerts = alertsData?.items ?? alertsData ?? []
     const count = Array.isArray(alerts) ? alerts.length : 0
-    if (prevAlertCountRef.current !== null && count > prevAlertCountRef.current && fastPollEndRef.current) {
-      const newest = Array.isArray(alerts) ? alerts[0] : null
-      setToast({
-        message: newest
-          ? `New alert: ${newest.pattern_type ?? newest.patternType ?? 'Fraud Pattern'} detected`
-          : 'New fraud alert detected',
-        type: 'alert',
-      })
+    if (prevAlertCountRef.current !== null && count > prevAlertCountRef.current && pollTimerRef.current) {
+      const newest = alerts[0]
+      setToast(newest
+        ? `New alert: ${newest.patternType ?? 'Fraud Pattern'} detected`
+        : 'New fraud alert detected'
+      )
       setTimeout(() => setToast(null), 6000)
     }
     prevAlertCountRef.current = count
-  }, [alertsData])
+  }, [alerts])
+
+  // Cleanup on unmount
+  useEffect(() => () => {
+    clearInterval(stepTimerRef.current)
+    clearInterval(pollTimerRef.current)
+  }, [])
 
   async function handleSimulate() {
     if (isSimulating) return
 
-    // Start step counter
     setSimStep(1)
-    fastPollEndRef.current = Date.now() + 30_000
 
+    // Step label counter — advances every 2.2s to match backend's 2s gaps
     let step = 1
     stepTimerRef.current = setInterval(() => {
       step += 1
       if (step <= 4) {
         setSimStep(step)
       } else if (step === 5) {
-        setSimStep(5) // "Analyzing..."
+        setSimStep(5)
       } else {
         clearInterval(stepTimerRef.current)
-        setSimStep(-1) // done
+        setSimStep(-1)
         setTimeout(() => setSimStep(0), 3000)
       }
     }, 2200)
 
+    // Fast-poll transactions + alerts for 30s via manual invalidation
+    pollTimerRef.current = setInterval(() => {
+      queryClient.invalidateQueries({ queryKey: ['recent-transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['alerts'] })
+    }, 2500)
+    setTimeout(() => clearInterval(pollTimerRef.current), 30_000)
+
     try {
       await apiClient.post('/webhooks/squad/simulate')
-      // Immediately start refreshing
       queryClient.invalidateQueries({ queryKey: ['recent-transactions'] })
     } catch {
       // silent — demo mode
     }
   }
-
-  // Cleanup on unmount
-  useEffect(() => () => clearInterval(stepTimerRef.current), [])
 
   function renderButtonLabel() {
     if (simStep >= 1 && simStep <= 4) {
@@ -138,20 +140,16 @@ export function SquadFeed() {
   return (
     <div className="bg-[#111827] border border-[#2D3748] rounded-lg overflow-hidden">
       {toast && (
-        <div className={`px-4 py-2 text-xs font-medium flex items-center gap-2 ${
-          toast.type === 'alert'
-            ? 'bg-red-500/10 border-b border-red-500/30 text-red-400'
-            : 'bg-green-500/10 border-b border-green-500/30 text-green-400'
-        }`}>
-          <span>{toast.type === 'alert' ? '🚨' : '✓'}</span>
-          {toast.message}
+        <div className="px-4 py-2 text-xs font-medium flex items-center gap-2 bg-red-500/10 border-b border-red-500/30 text-red-400">
+          <span>🚨</span>
+          {toast}
         </div>
       )}
 
       <div className="px-4 py-3 border-b border-[#2D3748] flex items-center gap-3">
         <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium">Squad Live Feed</p>
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto">
           <button
             onClick={handleSimulate}
             disabled={isSimulating}
