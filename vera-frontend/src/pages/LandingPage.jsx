@@ -531,7 +531,7 @@ export default function LandingPage() {
                 },
                 {
                   title: 'Shell Director Webs',
-                  body: 'Three businesses. Two shared directors. One registered address. All transacting with each other. Each entity passes individual verification. In VERA's graph, the web is immediate.',
+                  body: 'Three businesses. Two shared directors. One registered address. All transacting with each other. Each entity passes individual verification. In VERA\'s graph, the web is immediate.',
                   delay: '240ms',
                 },
               ].map(({ title, body, delay }) => (
