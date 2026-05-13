@@ -27,6 +27,7 @@ function extractRiskFields(risk) {
   }
 }
 
+// used by entity detail page only
 export function useEntities() {
   return useQuery({
     queryKey: ['entities'],
@@ -34,20 +35,7 @@ export function useEntities() {
       const data = await entitiesApi.getAll()
       const items = data.items ?? data
       if (!Array.isArray(items)) return []
-
-      const rows = items.map(normaliseEntity)
-      const hydratedRows = await Promise.all(
-        rows.map(async (row) => {
-          try {
-            const risk = await entitiesApi.getRisk(row.id)
-            return { ...row, ...extractRiskFields(risk) }
-          } catch {
-            return row
-          }
-        })
-      )
-
-      return hydratedRows
+      return items.map(normaliseEntity)
     },
     staleTime: 60_000,
   })
