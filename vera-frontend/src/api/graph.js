@@ -1,10 +1,8 @@
 import { apiClient } from './client'
-import { mockGraphData } from '@/utils/mockData'
 
 export const graphApi = {
-  getFullGraph: () => apiClient.get('/graph').then((r) => r.data).catch(() => mockGraphData),
-  getSubgraph: (entityIds) => apiClient.post('/graph/subgraph', { entityIds }).then((r) => r.data).catch(() => ({
-    nodes: mockGraphData.nodes.filter((n) => entityIds.includes(n.id)),
-    links: mockGraphData.links.filter((l) => entityIds.includes(l.source) && entityIds.includes(l.target)),
-  })),
+  getFullGraph: (limit = 500) => 
+    apiClient.get(`/graph?limit=${limit}`).then((r) => r.data),
+  getSubgraph: (entityIds) => 
+    apiClient.post('/graph/subgraph', { entity_ids: entityIds }).then((r) => r.data),
 }
