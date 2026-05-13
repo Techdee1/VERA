@@ -17,7 +17,7 @@ app = FastAPI(title="VERA Backend", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:4173", "https://vera-428w.vercel.app", "https://vera-drab.vercel.app"],
+    allow_origins=["http://localhost:5173", "http://localhost:4173", "https://vera-delta-seven.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
