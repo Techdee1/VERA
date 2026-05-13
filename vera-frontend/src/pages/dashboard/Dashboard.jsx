@@ -4,6 +4,7 @@ import { RiskTrendChart } from '@/components/charts/RiskTrendChart'
 import { TransactionVolumeChart } from '@/components/charts/TransactionVolumeChart'
 import { AlertCard } from '@/components/alerts/AlertCard'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { SquadFeed } from '@/components/dashboard/SquadFeed'
 import { useAlerts } from '@/hooks/useAlerts'
 import { useEntityTotal } from '@/hooks/useEntities'
 import { useSTRs } from '@/hooks/useSTR'
@@ -96,6 +97,11 @@ export default function Dashboard() {
           <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-3">Alert Pipeline Status</p>
           <TransactionVolumeChart />
         </div>
+      </div>
+
+      {/* Squad Live Feed */}
+      <div className="mb-6">
+        <SquadFeed />
       </div>
 
       {/* Recent Alerts */}

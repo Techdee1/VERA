@@ -22,7 +22,7 @@ function SidebarContent({ onClose }) {
       <div className="h-16 flex items-center px-5 border-b border-[#2D3748] justify-between">
         <NavLink to="/" onClick={onClose} className="flex items-center gap-2 group">
           <span className="text-lg font-bold tracking-tight text-[#F7F9FC] group-hover:text-white transition-colors">
-            GR<span className="text-[#00D4AA]">ACE</span>
+            VE<span className="text-[#00D4AA]">RA</span>
           </span>
           <span className="text-[10px] text-[#4B5563] font-mono group-hover:text-[#94A3B8] transition-colors">v1.0</span>
         </NavLink>

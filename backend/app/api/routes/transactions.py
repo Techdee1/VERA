@@ -1,18 +1,19 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from redis.exceptions import RedisError
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_db
-from app.models import Alert, IngestJob, Transaction
+from app.models import Alert, Entity, IngestJob, Transaction
 from app.schemas.transactions import (
     IngestAcceptedResponse,
     IngestJobStatusResponse,
     TransactionIngestBatchRequest,
     TransactionIngestItem,
     TransactionResponse,
+    TransactionRecentResponse,
 )
 from app.services.ingest_service import create_ingest_job
 
@@ -55,6 +56,36 @@ def get_job_status(
         created_at=job.created_at,
         updated_at=job.updated_at,
     )
+
+
+@router.get("/transactions/recent", response_model=list[TransactionRecentResponse])
+def list_recent_transactions(
+    limit: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[TransactionRecentResponse]:
+    rows = db.scalars(
+        select(Transaction).order_by(Transaction.occurred_at.desc()).limit(limit)
+    ).all()
+
+    entity_ids = {r.source_entity_id for r in rows} | {r.destination_entity_id for r in rows}
+    entities = {
+        e.id: e
+        for e in db.scalars(select(Entity).where(Entity.id.in_(entity_ids))).all()
+    }
+
+    return [
+        TransactionRecentResponse(
+            id=row.id,
+            from_entity_id=row.source_entity_id,
+            to_entity_id=row.destination_entity_id,
+            from_entity_name=entities[row.source_entity_id].full_name if row.source_entity_id in entities else None,
+            to_entity_name=entities[row.destination_entity_id].full_name if row.destination_entity_id in entities else None,
+            amount=row.amount,
+            channel=row.channel,
+            date=row.occurred_at,
+        )
+        for row in rows
+    ]
 
 
 @router.get("/transactions", response_model=list[TransactionResponse])

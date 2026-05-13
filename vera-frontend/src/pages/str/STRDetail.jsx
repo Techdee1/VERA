@@ -85,6 +85,15 @@ export default function STRDetail() {
     <div>
       <PageHeader backTo="/str" title={`STR ${str.id}`} subtitle={`Alert: ${str.alertId}`} />
 
+      {/* Squad Transaction Reference */}
+      {str.squad_transaction_ref && (
+        <div className="mb-4 flex items-center gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold">S</span>
+          <span className="text-sm text-green-400 font-medium">Filed via Squad</span>
+          <span className="text-xs text-[#94A3B8] font-mono">{str.squad_transaction_ref}</span>
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-3 gap-4 mb-4">
         <div className="space-y-4">
           <STRPreview str={str} />

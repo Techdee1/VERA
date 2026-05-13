@@ -61,3 +61,14 @@ class TransactionResponse(BaseModel):
     amount: Decimal
     date: datetime
     channel: str | None = None
+
+
+class TransactionRecentResponse(BaseModel):
+    id: UUID
+    from_entity_id: UUID
+    to_entity_id: UUID
+    from_entity_name: str | None = None
+    to_entity_name: str | None = None
+    amount: Decimal
+    channel: str | None = None
+    date: datetime

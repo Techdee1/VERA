@@ -6,6 +6,7 @@ import { GraphCanvas } from '@/components/graph/GraphCanvas'
 import { useEntity } from '@/hooks/useEntities'
 import { useAlerts } from '@/hooks/useAlerts'
 import { Spinner } from '@/components/ui/Spinner'
+import { EntityTrustScoreCard } from '@/components/entities/EntityTrustScoreCard'
 import { formatNairaShort } from '@/utils/formatters'
 import { deriveRiskLevel } from '@/utils/risk'
 
@@ -53,6 +54,8 @@ export default function EntityDetail() {
   return (
     <div>
       <PageHeader backTo="/entities" title={entity.canonicalName} subtitle={entity.id} />
+
+      <EntityTrustScoreCard entityId={id} />
 
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <EntityProfile entity={entity} />

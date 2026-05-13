@@ -1,4 +1,5 @@
 import { formatDateTime, formatNairaShort } from '@/utils/formatters'
+import { SquadBadge } from '@/components/ui/SquadBadge'
 
 const FLAG_COLORS = {
   STRUCTURING: 'text-red-400',
@@ -16,7 +17,7 @@ export function TransactionList({ transactions }) {
       <table className="w-full text-sm">
         <thead className="bg-[#1C2333]">
           <tr>
-            {['Date', 'From', 'To', 'Amount', 'Type', 'Flag'].map((h) => (
+            {['Date', 'From', 'To', 'Amount', 'Channel', 'Flag'].map((h) => (
               <th key={h} className="px-4 py-3 text-left text-[10px] uppercase tracking-wider text-[#4B5563] font-medium">{h}</th>
             ))}
           </tr>
@@ -28,7 +29,9 @@ export function TransactionList({ transactions }) {
               <td className="px-4 py-3 text-[#94A3B8] font-mono text-xs">{tx.fromEntity}</td>
               <td className="px-4 py-3 text-[#94A3B8] font-mono text-xs">{tx.toEntity}</td>
               <td className="px-4 py-3 text-[#F7F9FC] font-mono text-xs">{formatNairaShort(tx.amount)}</td>
-              <td className="px-4 py-3 text-[#94A3B8] text-xs">{tx.type}</td>
+              <td className="px-4 py-3 text-xs">
+                {tx.channel === 'squad_payment' ? <SquadBadge /> : <span className="text-[#94A3B8]">{tx.type ?? tx.channel ?? '—'}</span>}
+              </td>
               <td className="px-4 py-3 text-xs">
                 <span className={`font-mono font-medium ${FLAG_COLORS[tx.flag] ?? 'text-[#94A3B8]'}`}>{tx.flag}</span>
               </td>

@@ -1,0 +1,97 @@
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/api/client'
+import { formatNaira } from '@/utils/formatters'
+import { Spinner } from '@/components/ui/Spinner'
+
+function getRiskColor(score) {
+  const n = parseFloat(score)
+  if (n >= 0.7) return 'border-red-500'
+  if (n >= 0.4) return 'border-amber-500'
+  return 'border-green-500'
+}
+
+function getRelativeTime(isoDate) {
+  const now = Date.now()
+  const then = new Date(isoDate).getTime()
+  const diffMs = now - then
+  const diffMin = Math.floor(diffMs / 60_000)
+  if (diffMin < 1) return 'just now'
+  if (diffMin === 1) return '1 min ago'
+  if (diffMin < 60) return `${diffMin} min ago`
+  const diffHr = Math.floor(diffMin / 60)
+  if (diffHr === 1) return '1 hr ago'
+  return `${diffHr} hrs ago`
+}
+
+function truncate(str, maxLen) {
+  if (!str) return '—'
+  return str.length > maxLen ? str.slice(0, maxLen) + '…' : str
+}
+
+export function SquadFeed() {
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['recent-transactions'],
+    queryFn: () => apiClient.get('/transactions/recent').then(r => r.data),
+    refetchInterval: 10000,
+    staleTime: 8000,
+  })
+
+  const transactions = Array.isArray(data) ? data : data?.transactions ?? []
+
+  return (
+    <div className="bg-[#111827] border border-[#2D3748] rounded-lg overflow-hidden">
+      <div className="px-4 py-3 border-b border-[#2D3748] flex items-center gap-2">
+        <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium">Squad Live Feed</p>
+        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+      </div>
+
+      <div className="divide-y divide-[#2D3748] max-h-[400px] overflow-y-auto">
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Spinner />
+          </div>
+        ) : isError ? (
+          <div className="px-4 py-8 text-center">
+            <p className="text-sm text-red-400">Feed unavailable. Check connection.</p>
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="px-4 py-8 text-center">
+            <p className="text-sm text-[#94A3B8] mb-2">Waiting for Squad transactions.</p>
+            <p className="text-xs text-[#4B5563]">Webhook is listening.</p>
+            <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse mt-2" />
+          </div>
+        ) : (
+          transactions.slice(0, 8).map((txn) => {
+            const riskScore = parseFloat(txn.risk_score ?? txn.riskScore ?? 0)
+            const borderColor = getRiskColor(riskScore)
+            const isSquad = txn.channel === 'squad_payment'
+            const senderName = txn.from_entity_name ?? txn.fromEntityName ?? txn.fromEntity ?? txn.from_entity ?? txn.id
+            const receiverName = txn.to_entity_name ?? txn.toEntityName ?? txn.toEntity ?? txn.to_entity ?? '—'
+            const timestamp = txn.date ?? txn.created_at ?? txn.createdAt
+
+            return (
+              <div key={txn.id} className={`px-4 py-3 border-l-4 ${borderColor} hover:bg-[#1C2333] transition-colors`}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-sm text-[#F7F9FC] font-medium truncate">{truncate(senderName, 20)}</span>
+                    <span className="text-[#4B5563]">→</span>
+                    <span className="text-sm text-[#F7F9FC] truncate">{truncate(receiverName, 20)}</span>
+                  </div>
+                  {isSquad && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2 shrink-0">
+                      Squad
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-[#00D4AA]">{formatNaira(txn.amount ?? 0)}</span>
+                  <span className="text-xs text-[#4B5563]">{getRelativeTime(timestamp)}</span>
+                </div>
+              </div>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
