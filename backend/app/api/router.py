@@ -21,6 +21,6 @@ api_router.include_router(str_drafts_router, tags=["str"])
 api_router.include_router(webhooks_router, prefix="/webhooks", tags=["webhooks"])
 api_router.include_router(
     transfers_router, 
-    prefix="/api/v1/transfers", 
+    prefix="/transfers", 
     tags=["Transfers"]
 )
