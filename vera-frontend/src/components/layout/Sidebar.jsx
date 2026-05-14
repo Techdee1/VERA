@@ -21,52 +21,81 @@ const navItems = [
 
 function SidebarContent({ onClose }) {
   return (
-    <aside className="w-56 h-full bg-[#111827] border-r border-[#2D3748] flex flex-col">
-      <div className="h-16 flex items-center px-5 border-b border-[#2D3748] justify-between">
-        <NavLink to="/" onClick={onClose} className="flex items-center gap-2 group">
-          <span className="text-lg font-bold tracking-tight text-[#F7F9FC] group-hover:text-white transition-colors">
-            VE<span className="text-[#00D4AA]">RA</span>
-          </span>
-          <span className="text-[10px] text-[#4B5563] font-mono group-hover:text-[#94A3B8] transition-colors">v1.0</span>
+    <aside className="w-56 h-full bg-[#0D1117] border-r border-[#1E2535] flex flex-col relative overflow-hidden">
+      {/* Squad gradient top strip */}
+      <div className="h-0.5 w-full squad-gradient-bg shrink-0" />
+
+      {/* Logo area */}
+      <div className="px-4 pt-4 pb-3 border-b border-[#1E2535] shrink-0">
+        <NavLink to="/" onClick={onClose} className="flex items-center gap-2 group mb-3">
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-bold tracking-tight text-white">VE</span>
+            <span className="text-xl font-bold tracking-tight text-squad-gradient">RA</span>
+          </div>
+          <span className="text-[9px] text-[#4B5563] font-mono bg-[#1C2333] px-1.5 py-0.5 rounded">v1.0</span>
         </NavLink>
-        {onClose && (
-          <button onClick={onClose} className="p-1 rounded text-[#4B5563] hover:text-[#F7F9FC] lg:hidden">
-            <XMarkIcon className="w-4 h-4" />
-          </button>
-        )}
+
+        {/* Squad logo */}
+        <div className="flex items-center gap-2 mb-2.5">
+          <span className="text-[9px] text-[#4B5563] font-mono uppercase tracking-wider">Built for</span>
+          <img src="/squad-logo.svg" alt="Squad" className="h-3.5 w-auto opacity-90" />
+        </div>
+
+        {/* Hackathon badge */}
+        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md squad-gradient-bg">
+          <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse shrink-0" />
+          <span className="text-[9px] font-bold text-white tracking-wide uppercase">Hackathon 3.0</span>
+        </div>
       </div>
 
-      <nav className="flex-1 py-4 px-2 space-y-0.5 overflow-y-auto">
+      {/* Nav */}
+      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             onClick={onClose}
             className={({ isActive }) => cn(
-              'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors',
+              'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-all duration-150',
               isActive
-                ? 'bg-[#00D4AA]/10 text-[#00D4AA]'
-                : 'text-[#94A3B8] hover:bg-[#1C2333] hover:text-[#F7F9FC]'
+                ? 'bg-gradient-to-r from-[#FF4C1D]/15 to-[#9B0063]/10 text-[#FF6B3D] border border-[#FF4C1D]/20'
+                : 'text-[#94A3B8] hover:bg-[#161B27] hover:text-[#F7F9FC] border border-transparent'
             )}
           >
-            <Icon className="w-4 h-4 shrink-0" />
-            <span className="font-medium">{label}</span>
+            {({ isActive }) => (
+              <>
+                <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-[#FF6B3D]' : '')} />
+                <span className="font-medium">{label}</span>
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#FF4C1D] shrink-0" />
+                )}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-2 border-t border-[#2D3748]">
+      {/* Footer */}
+      <div className="p-2 border-t border-[#1E2535] space-y-1">
         <NavLink
           to="/settings"
           onClick={onClose}
           className={({ isActive }) => cn(
-            'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors',
-            isActive ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'text-[#4B5563] hover:text-[#F7F9FC] hover:bg-[#1C2333]'
+            'flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-all border',
+            isActive
+              ? 'bg-gradient-to-r from-[#FF4C1D]/15 to-[#9B0063]/10 text-[#FF6B3D] border-[#FF4C1D]/20'
+              : 'text-[#4B5563] hover:text-[#F7F9FC] hover:bg-[#161B27] border-transparent'
           )}
         >
           <Cog6ToothIcon className="w-4 h-4" />
           <span>Settings</span>
         </NavLink>
+
+        {/* Squad powered-by strip */}
+        <div className="flex items-center justify-center gap-2 py-2 mt-1">
+          <span className="text-[9px] text-[#4B5563] font-mono">Powered by</span>
+          <img src="/squad-logo.svg" alt="Squad" className="h-3 w-auto opacity-50" />
+        </div>
       </div>
     </aside>
   )

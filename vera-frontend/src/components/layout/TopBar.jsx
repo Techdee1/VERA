@@ -74,7 +74,10 @@ export function TopBar() {
   }
 
   return (
-    <header className="h-14 bg-[#111827] border-b border-[#2D3748] flex items-center px-4 lg:px-6 gap-3 shrink-0">
+    <header className="bg-[#0D1117] border-b border-[#1E2535] flex flex-col shrink-0">
+      {/* Squad gradient strip */}
+      <div className="h-0.5 w-full squad-gradient-bg" />
+    <div className="h-13 flex items-center px-4 lg:px-6 gap-3">
       <button
         onClick={toggleSidebar}
         className="lg:hidden p-2 rounded-md text-[#94A3B8] hover:text-[#F7F9FC] hover:bg-[#1C2333] transition-colors"
@@ -157,19 +160,25 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-3 ml-auto">
+        {/* Squad Hackathon badge */}
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full squad-gradient-bg glow-squad">
+          <img src="/squad-logo.svg" alt="Squad" className="h-3 w-auto brightness-[100] invert" />
+          <span className="text-[10px] font-bold text-white tracking-wide uppercase">Hackathon 3.0</span>
+        </div>
+
         <button
           onClick={clearNotifications}
-          className="relative p-2 rounded-md text-[#94A3B8] hover:text-[#F7F9FC] hover:bg-[#1C2333] transition-colors"
+          className="relative p-2 rounded-md text-[#94A3B8] hover:text-[#F7F9FC] hover:bg-[#161B27] transition-colors"
         >
           <BellIcon className="w-4 h-4" />
           {notifications > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#FF4C1D] rounded-full" />
           )}
         </button>
 
-        <div className="flex items-center gap-2 pl-3 border-l border-[#2D3748]">
-          <div className="w-7 h-7 rounded-full bg-[#00D4AA]/20 flex items-center justify-center">
-            <span className="text-xs font-semibold text-[#00D4AA]">AO</span>
+        <div className="flex items-center gap-2 pl-3 border-l border-[#1E2535]">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF4C1D]/30 to-[#9B0063]/30 border border-[#FF4C1D]/30 flex items-center justify-center">
+            <span className="text-xs font-semibold text-[#FF8560]">AO</span>
           </div>
           <span className="hidden sm:block text-sm text-[#94A3B8]">Akeem Jr.</span>
           <button onClick={handleLogout} className="p-1 rounded text-[#4B5563] hover:text-red-400 transition-colors ml-1" title="Logout">
@@ -177,6 +186,7 @@ export function TopBar() {
           </button>
         </div>
       </div>
+    </div>
     </header>
   )
 }
