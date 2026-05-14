@@ -97,7 +97,13 @@ def process_job(job_id: str) -> None:
         processed_count = 0
         for record in records:
             tx = _upsert_transaction_record(db, record)
-            _upsert_graph_from_record(db, tx)
+            db.commit()  # persist transaction before Neo4j — Neo4j failure must not roll this back
+
+            try:
+                _upsert_graph_from_record(db, tx)
+            except Exception as graph_exc:
+                print(f"[ingest-worker] graph upsert failed job_id={job_id}: {graph_exc}")
+
             processed_count += 1
             job.processed_records = processed_count
 

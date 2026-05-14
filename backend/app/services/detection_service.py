@@ -306,90 +306,77 @@ def _detect_shell_director_web(db: Session, ctx: DetectionContext) -> int:
     return created
 
 
-def _has_direct_relationship(ctx: DetectionContext, origin_id: uuid.UUID, destination_id: uuid.UUID) -> bool:
-    for tx in ctx.transactions:
-        if (tx.source_entity_id == origin_id and tx.destination_entity_id == destination_id) or (
-            tx.source_entity_id == destination_id and tx.destination_entity_id == origin_id
-        ):
-            return True
-    return False
-
 
 def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
+    """
+    Detects linear hop chains: A → B → C → D → ... within a 48-hour window.
+    Each intermediate passes funds along a single path (not fan-in).
+    Minimum 3 hops (4 entities) to fire.
+    """
     existing = _existing_fingerprints(db, PatternType.layered_transfer_chain)
     created = 0
 
-    tx_by_dest: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
-    tx_by_pair: dict[tuple[uuid.UUID, uuid.UUID], list[Transaction]] = defaultdict(list)
-    for tx in ctx.transactions:
-        tx_by_dest[tx.destination_entity_id].append(tx)
-        tx_by_pair[(tx.source_entity_id, tx.destination_entity_id)].append(tx)
+    end_time = ctx.now
+    window_start = end_time - timedelta(hours=48)
 
-    for tx in ctx.transactions:
-        recon_id = tx.source_entity_id
-        destination_id = tx.destination_entity_id
-        end_time = _ensure_utc(tx.occurred_at)
-        window_start = end_time - timedelta(hours=48)
+    # Only consider transactions within the window
+    windowed = [tx for tx in ctx.transactions if window_start <= _ensure_utc(tx.occurred_at) <= end_time]
 
-        inbound = [
-            row
-            for row in tx_by_dest.get(recon_id, [])
-            if window_start <= _ensure_utc(row.occurred_at) <= end_time and row.source_entity_id != destination_id
-        ]
-        intermediate_ids = {row.source_entity_id for row in inbound}
-        if len(intermediate_ids) < 4:
-            continue
+    outbound: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
+    all_receivers: set[uuid.UUID] = set()
+    for tx in windowed:
+        outbound[tx.source_entity_id].append(tx)
+        all_receivers.add(tx.destination_entity_id)
 
-        origin_candidates: dict[uuid.UUID, set[uuid.UUID]] = defaultdict(set)
-        candidate_tx_ids: list[uuid.UUID] = [tx.id]
-        for intermediate_id in intermediate_ids:
-            inbound_to_intermediate = tx_by_dest.get(intermediate_id, [])
-            for row in inbound_to_intermediate:
-                row_time = _ensure_utc(row.occurred_at)
-                if window_start <= row_time <= end_time and row.source_entity_id not in {recon_id, destination_id}:
-                    origin_candidates[row.source_entity_id].add(intermediate_id)
-                    candidate_tx_ids.append(row.id)
+    # Chain origins: entities that send within the window but never receive
+    origins = set(outbound.keys()) - all_receivers
 
-        origin_id = None
-        used_intermediates: set[uuid.UUID] = set()
-        for candidate_origin, hops in origin_candidates.items():
-            if len(hops) >= 4 and not _has_direct_relationship(ctx, candidate_origin, destination_id):
-                origin_id = candidate_origin
-                used_intermediates = hops
+    for origin_id in origins:
+        chain_entities: list[uuid.UUID] = [origin_id]
+        chain_txs: list[Transaction] = []
+        current = origin_id
+        visited: set[uuid.UUID] = {origin_id}
+
+        # Walk forward — linear chain means exactly 1 outbound per hop
+        while True:
+            next_txs = outbound.get(current, [])
+            if len(next_txs) != 1:
                 break
+            next_tx = next_txs[0]
+            next_entity = next_tx.destination_entity_id
+            if next_entity in visited:
+                break
+            chain_entities.append(next_entity)
+            chain_txs.append(next_tx)
+            visited.add(next_entity)
+            current = next_entity
 
-        if origin_id is None:
+        if len(chain_txs) < 3:
             continue
 
-        fingerprint = f"layered:{origin_id}:{destination_id}:{recon_id}"
+        destination_id = chain_entities[-1]
+        fingerprint = f"layered:{origin_id}:{destination_id}"
         if fingerprint in existing:
             continue
 
-        score = _risk_score(Decimal("0.8400"), Decimal(min(0.14, (len(used_intermediates) - 4) * 0.03)))
+        score = _risk_score(Decimal("0.8400"), Decimal(min(0.14, (len(chain_txs) - 3) * 0.03)))
         reason = (
-            f"Layered transfer chain detected: origin {origin_id} routed funds through "
-            f"{len(used_intermediates)} intermediates to destination {destination_id} within 48 hours"
+            f"Layered transfer chain detected: funds routed through {len(chain_txs)} hops "
+            f"from {origin_id} to {destination_id} within 48 hours"
         )
-
-        entity_ids = [origin_id, *sorted(used_intermediates), recon_id, destination_id]
-        anomaly_summary = _anomaly_summary_for_transactions(
-            [tx for tx in ctx.transactions if tx.id in set(candidate_tx_ids)],
-            ctx.sender_degree,
-            ctx.receiver_fan_in,
-        )
+        anomaly_summary = _anomaly_summary_for_transactions(chain_txs, ctx.sender_degree, ctx.receiver_fan_in)
         _create_alert(
             db=db,
             pattern_type=PatternType.layered_transfer_chain,
             risk_score=score,
             reason=reason,
-            entity_ids=entity_ids,
-            transaction_ids=list(dict.fromkeys(candidate_tx_ids)),
+            entity_ids=chain_entities,
+            transaction_ids=[tx.id for tx in chain_txs],
             subgraph_json={
                 "fingerprint": fingerprint,
                 "origin_id": str(origin_id),
-                "recon_id": str(recon_id),
                 "destination_id": str(destination_id),
-                "intermediate_count": len(used_intermediates),
+                "chain_length": len(chain_txs),
                 "window_hours": 48,
                 "anomaly_score": anomaly_summary["anomaly_score"],
                 "anomaly_confidence": anomaly_summary["anomaly_confidence"],
