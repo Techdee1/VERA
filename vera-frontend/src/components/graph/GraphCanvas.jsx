@@ -3,7 +3,9 @@ import * as d3 from 'd3'
 import { riskNodeColor } from '@/utils/riskColors'
 import { NodeTooltip } from './NodeTooltip'
 
-export function GraphCanvas({ nodes, links, onNodeClick }) {
+// height prop is optional — if provided the container uses that fixed px height,
+// otherwise it stretches to fill its flex parent (use inside a flex-1 container).
+export function GraphCanvas({ nodes, links, onNodeClick, height }) {
   const containerRef = useRef(null)
   const svgRef = useRef(null)
   const simRef = useRef(null)
@@ -162,7 +164,11 @@ export function GraphCanvas({ nodes, links, onNodeClick }) {
   }, [render])
 
   return (
-    <div ref={containerRef} className="relative w-full h-full">
+    <div
+      ref={containerRef}
+      className="relative w-full"
+      style={height ? { height } : { height: '100%' }}
+    >
       <svg ref={svgRef} className="w-full h-full" />
       <NodeTooltip node={tooltip?.node} x={tooltip?.x} y={tooltip?.y} />
     </div>
