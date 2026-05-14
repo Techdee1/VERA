@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { PageHeader } from '@/components/layout/PageHeader'
 import { SquadMetrics } from '@/components/squad/SquadMetrics'
 import { SquadFlowChart } from '@/components/squad/SquadFlowChart'
 import { SquadActivityLog } from '@/components/squad/SquadActivityLog'
 import { SquadTransactionDrawer } from '@/components/squad/SquadTransactionDrawer'
 import { SquadFilingsPanel } from '@/components/squad/SquadFilingsPanel'
 import { SquadWebhookLog } from '@/components/squad/SquadWebhookLog'
-import { Button } from '@/components/ui/Button'
 import { useSquadTransactions, useSquadMetrics, useSquadFilings } from '@/hooks/useSquad'
 import { ArrowPathIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { formatDateTime } from '@/utils/formatters'
@@ -55,34 +53,50 @@ export default function SquadMonitor() {
 
   return (
     <div>
-      <PageHeader
-        title="Squad Monitor"
-        subtitle="Real-time payment flow · transaction visibility · filing activity"
-        actions={
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#111827] border border-[#2D3748] rounded-md">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs text-[#94A3B8]">Live</span>
+      {/* Page header — Squad branded */}
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <img src="/squad-logo.svg" alt="Squad" className="h-5 w-auto" />
+              <h1 className="text-xl font-semibold text-[#F7F9FC]">Monitor</h1>
+              {/* Live indicator — Squad orange */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full squad-gradient-bg glow-squad">
+                <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse" />
+                <span className="text-[10px] font-bold text-white uppercase tracking-wide">Live</span>
+              </div>
             </div>
+            <p className="text-sm text-[#4B5563]">
+              Real-time payment flow · transaction visibility · filing activity
+            </p>
             {lastUpdated && (
-              <span className="text-xs text-[#4B5563] hidden lg:block">{lastUpdated}</span>
+              <p className="text-[10px] text-[#4B5563] font-mono mt-0.5 hidden lg:block">{lastUpdated}</p>
             )}
-            <Button variant="secondary" size="sm" onClick={handleRefresh} loading={refreshing}>
-              <ArrowPathIcon className="w-3.5 h-3.5" />
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-[#161B27] border border-[#1E2535] text-[#94A3B8] hover:text-[#F7F9FC] hover:border-[#FF4C1D]/30 transition-colors disabled:opacity-50"
+            >
+              <ArrowPathIcon className={cn('w-3.5 h-3.5', refreshing && 'animate-spin')} />
               Refresh
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            </button>
+            <button
               onClick={() => exportCsv(transactions)}
               disabled={transactions.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md squad-gradient-bg text-white hover:opacity-90 transition-opacity disabled:opacity-40"
             >
               <ArrowDownTrayIcon className="w-3.5 h-3.5" />
               Export CSV
-            </Button>
+            </button>
           </div>
-        }
-      />
+        </div>
+      </div>
+
+      {/* Squad gradient divider */}
+      <div className="h-px w-full squad-gradient-bg mb-6 rounded-full opacity-40" />
 
       <div className="mb-6">
         <SquadMetrics metrics={metrics} isLoading={txLoading} />
@@ -92,16 +106,16 @@ export default function SquadMonitor() {
         <SquadFlowChart transactions={transactions} isLoading={txLoading} />
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-1 mb-4 bg-[#111827] border border-[#2D3748] rounded-lg p-1 w-fit">
+      {/* Tab bar — Squad active state */}
+      <div className="flex gap-1 mb-4 bg-[#0D1117] border border-[#1E2535] rounded-lg p-1 w-fit">
         {TABS.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              'px-4 py-1.5 rounded-md text-xs font-medium transition-colors',
+              'px-4 py-1.5 rounded-md text-xs font-medium transition-all',
               activeTab === tab
-                ? 'bg-[#00D4AA]/10 text-[#00D4AA]'
+                ? 'squad-gradient-bg text-white shadow-sm'
                 : 'text-[#4B5563] hover:text-[#94A3B8]'
             )}
           >

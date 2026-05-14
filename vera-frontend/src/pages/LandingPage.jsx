@@ -46,6 +46,9 @@ function IconShield({ className, style }) {
 
 const DARK = '#0A1628'
 const ACCENT = '#00D68F'
+const SQUAD_FROM = '#FF4C1D'
+const SQUAD_TO = '#9B0063'
+const SQUAD_GRADIENT = `linear-gradient(135deg, ${SQUAD_FROM}, ${SQUAD_TO})`
 
 /* ─── Scroll-fade observer ─────────────────────────────────────────────────── */
 function useFadeUp() {
@@ -210,23 +213,25 @@ function Nav() {
       className="sticky top-0 z-50 border-b border-white/10"
       style={{ background: DARK }}
     >
+      {/* Squad gradient top strip */}
+      <div style={{ height: '2px', background: SQUAD_GRADIENT }} />
       <div className="max-w-[1200px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-y-3">
         {/* Logo */}
         <a href="/" className="flex items-center gap-3 no-underline">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect width="32" height="32" rx="7" fill={ACCENT} fillOpacity="0.12" />
-            <circle cx="16" cy="10" r="3" fill={ACCENT} />
-            <circle cx="8"  cy="24" r="3" fill={ACCENT} fillOpacity="0.7" />
-            <circle cx="24" cy="24" r="3" fill={ACCENT} fillOpacity="0.7" />
-            <line x1="16" y1="13" x2="8"  y2="21" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.6" />
-            <line x1="16" y1="13" x2="24" y2="21" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.6" />
-            <line x1="8"  y1="24" x2="24" y2="24" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.3" />
+            <rect width="32" height="32" rx="7" fill={SQUAD_FROM} fillOpacity="0.15" />
+            <circle cx="16" cy="10" r="3" fill={SQUAD_FROM} />
+            <circle cx="8"  cy="24" r="3" fill={SQUAD_TO} fillOpacity="0.9" />
+            <circle cx="24" cy="24" r="3" fill={SQUAD_TO} fillOpacity="0.9" />
+            <line x1="16" y1="13" x2="8"  y2="21" stroke={SQUAD_FROM} strokeWidth="1.5" strokeOpacity="0.6" />
+            <line x1="16" y1="13" x2="24" y2="21" stroke={SQUAD_FROM} strokeWidth="1.5" strokeOpacity="0.6" />
+            <line x1="8"  y1="24" x2="24" y2="24" stroke={SQUAD_TO} strokeWidth="1.5" strokeOpacity="0.3" />
           </svg>
           <span
             className="text-white text-lg font-display tracking-wide"
             style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700 }}
           >
-            VE<span style={{ color: ACCENT }}>RA</span>
+            VE<span style={{ background: SQUAD_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>RA</span>
           </span>
         </a>
 
@@ -235,12 +240,15 @@ function Nav() {
           <button onClick={() => scrollTo('how-it-works')} className="text-sm text-[#94A3B8] hover:text-white transition-colors bg-transparent border-0 cursor-pointer">How It Works</button>
           <button onClick={() => scrollTo('why-nigeria')}  className="text-sm text-[#94A3B8] hover:text-white transition-colors bg-transparent border-0 cursor-pointer">Why Nigeria</button>
           <a href="mailto:damilareodebiyi3@gmail.com"       className="text-sm text-[#94A3B8] hover:text-white transition-colors no-underline">Contact</a>
+          {/* Squad logo badge */}
+          <div className="hidden sm:flex items-center gap-2 border border-white/10 rounded-full px-3 py-1">
+            <img src="/squad-logo.svg" alt="Squad" style={{ height: '14px', width: 'auto' }} />
+            <span style={{ fontSize: '10px', color: '#64748B', fontFamily: 'monospace' }}>Hackathon 3.0</span>
+          </div>
           <a
             href="/dashboard"
-            className="px-5 py-2 rounded-lg text-sm font-semibold no-underline transition-colors"
-            style={{ background: ACCENT, color: DARK }}
-            onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9' }}
-            onMouseLeave={(e) => { e.currentTarget.style.opacity = '1' }}
+            className="px-5 py-2 rounded-lg text-sm font-semibold no-underline transition-opacity hover:opacity-90"
+            style={{ background: SQUAD_GRADIENT, color: '#fff' }}
           >
             Open Dashboard →
           </a>
@@ -267,11 +275,14 @@ export default function LandingPage() {
 
             {/* Left: copy */}
             <div>
-              <div
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono mb-8"
-                style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}35`, color: ACCENT }}
-              >
-                Squad Hackathon 3.0 · Smart Systems: The Intelligent Economy
+              <div className="flex items-center gap-3 mb-8">
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-mono"
+                  style={{ background: `${SQUAD_FROM}18`, border: `1px solid ${SQUAD_FROM}35`, color: '#FF8560' }}
+                >
+                  <img src="/squad-logo.svg" alt="Squad" style={{ height: '12px', width: 'auto' }} />
+                  Hackathon 3.0 · Smart Systems: The Intelligent Economy
+                </div>
               </div>
 
               <h1
@@ -279,7 +290,7 @@ export default function LandingPage() {
                 style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: 'clamp(2.4rem, 5vw, 3.6rem)', lineHeight: 1.1, color: '#FFFFFF', letterSpacing: '-0.02em' }}
               >
                 Financial crime hides<br />in networks.{' '}
-                <span style={{ color: ACCENT }}>VERA sees them all.</span>
+                <span style={{ background: SQUAD_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>VERA sees them all.</span>
               </h1>
 
               <p
@@ -298,8 +309,8 @@ export default function LandingPage() {
 
               <a
                 href="/dashboard"
-                className="inline-block px-8 py-4 rounded-lg font-semibold text-base no-underline lg-cta-pulse"
-                style={{ background: ACCENT, color: DARK }}
+                className="inline-block px-8 py-4 rounded-lg font-semibold text-base no-underline transition-opacity hover:opacity-90"
+                style={{ background: SQUAD_GRADIENT, color: '#fff', boxShadow: `0 0 24px ${SQUAD_FROM}40` }}
               >
                 Explore the Live Demo →
               </a>
@@ -436,7 +447,7 @@ export default function LandingPage() {
               >
                 <span
                   className="font-mono font-semibold text-sm mb-4 block"
-                  style={{ color: ACCENT }}
+                  style={{ background: SQUAD_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
                 >
                   {n}
                 </span>
@@ -575,19 +586,19 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-3 gap-6 mb-16">
             {[
               {
-                icon: <IconNetwork className="w-6 h-6" style={{ color: ACCENT }} />,
+                icon: <IconNetwork className="w-6 h-6" style={{ color: SQUAD_FROM }} />,
                 title: 'Live Trust Graph',
                 body: 'Every entity in your institution, mapped in real time. Risk scores propagate across connected nodes the moment a pattern is detected. Powered by live Squad transaction data.',
                 delay: '0ms',
               },
               {
-                icon: <IconFileText className="w-6 h-6" style={{ color: ACCENT }} />,
+                icon: <IconFileText className="w-6 h-6" style={{ color: SQUAD_FROM }} />,
                 title: 'Automated STR Drafting',
                 body: 'When suspicious patterns are confirmed, VERA drafts a complete NFIU-compliant STR from the graph evidence. Your analyst reviews, edits, and approves — then files via Squad. Every compliance decision is recorded with a Squad transaction reference, financially traceable and immutably logged.',
                 delay: '80ms',
               },
               {
-                icon: <IconShield className="w-6 h-6" style={{ color: ACCENT }} />,
+                icon: <IconShield className="w-6 h-6" style={{ color: SQUAD_FROM }} />,
                 title: 'Immutable Audit Trail',
                 body: 'Every detection, review, and decision logged with a cryptographic hash. Built for NFIU and CBN regulator inspection. NDPA-compliant by design.',
                 delay: '160ms',
@@ -600,7 +611,7 @@ export default function LandingPage() {
               >
                 <div
                   className="w-11 h-11 rounded-lg flex items-center justify-center mb-6"
-                  style={{ background: `${ACCENT}18`, border: `1px solid ${ACCENT}30` }}
+                  style={{ background: `${SQUAD_FROM}18`, border: `1px solid ${SQUAD_FROM}30` }}
                 >
                   {icon}
                 </div>
@@ -690,8 +701,8 @@ export default function LandingPage() {
             </p>
             <a
               href="/dashboard"
-              className="inline-block px-10 py-4 rounded-lg font-semibold text-base no-underline lg-cta-pulse"
-              style={{ background: ACCENT, color: DARK, fontSize: '1rem' }}
+              className="inline-block px-10 py-4 rounded-lg font-semibold text-base no-underline transition-opacity hover:opacity-90"
+              style={{ background: SQUAD_GRADIENT, color: '#fff', fontSize: '1rem', boxShadow: `0 0 32px ${SQUAD_FROM}40` }}
             >
               Open the Live Dashboard →
             </a>
@@ -712,18 +723,18 @@ export default function LandingPage() {
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                  <rect width="32" height="32" rx="7" fill={ACCENT} fillOpacity="0.12" />
-                  <circle cx="16" cy="10" r="3" fill={ACCENT} />
-                  <circle cx="8"  cy="24" r="3" fill={ACCENT} fillOpacity="0.7" />
-                  <circle cx="24" cy="24" r="3" fill={ACCENT} fillOpacity="0.7" />
-                  <line x1="16" y1="13" x2="8"  y2="21" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.6" />
-                  <line x1="16" y1="13" x2="24" y2="21" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.6" />
-                  <line x1="8"  y1="24" x2="24" y2="24" stroke={ACCENT} strokeWidth="1.5" strokeOpacity="0.3" />
+                  <rect width="32" height="32" rx="7" fill={SQUAD_FROM} fillOpacity="0.15" />
+                  <circle cx="16" cy="10" r="3" fill={SQUAD_FROM} />
+                  <circle cx="8"  cy="24" r="3" fill={SQUAD_TO} fillOpacity="0.9" />
+                  <circle cx="24" cy="24" r="3" fill={SQUAD_TO} fillOpacity="0.9" />
+                  <line x1="16" y1="13" x2="8"  y2="21" stroke={SQUAD_FROM} strokeWidth="1.5" strokeOpacity="0.6" />
+                  <line x1="16" y1="13" x2="24" y2="21" stroke={SQUAD_FROM} strokeWidth="1.5" strokeOpacity="0.6" />
+                  <line x1="8"  y1="24" x2="24" y2="24" stroke={SQUAD_TO} strokeWidth="1.5" strokeOpacity="0.3" />
                 </svg>
                 <span
                   style={{ fontFamily: "'Space Grotesk', 'DM Sans', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: '#FFFFFF' }}
                 >
-                  VE<span style={{ color: ACCENT }}>RA</span>
+                  VE<span style={{ background: SQUAD_GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>RA</span>
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.65 }}>
@@ -741,9 +752,13 @@ export default function LandingPage() {
 
             {/* Recognition */}
             <div>
-              <p style={{ fontSize: '0.75rem', color: '#374151', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>Recognition</p>
-              <p style={{ fontSize: '0.85rem', color: '#475569', lineHeight: 1.65 }}>
-                Built for Squad Hackathon 3.0 — Smart Systems: The Intelligent Economy.
+              <p style={{ fontSize: '0.75rem', color: '#374151', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '12px' }}>Built for</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <img src="/squad-logo.svg" alt="Squad" style={{ height: '18px', width: 'auto' }} />
+                <span style={{ fontSize: '0.85rem', color: '#FF6B3D', fontWeight: 600 }}>Hackathon 3.0</span>
+              </div>
+              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.65 }}>
+                Smart Systems: The Intelligent Economy
               </p>
             </div>
           </div>

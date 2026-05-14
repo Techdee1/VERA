@@ -7,7 +7,6 @@ import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/utils/cn'
 
 const CHANNEL_COLORS = {
-  squad:    'bg-blue-500/10 text-blue-400 border-blue-500/30',
   transfer: 'bg-[#1C2333] text-[#94A3B8] border-[#2D3748]',
   pos:      'bg-amber-500/10 text-amber-400 border-amber-500/30',
   ussd:     'bg-purple-500/10 text-purple-400 border-purple-500/30',
@@ -18,6 +17,13 @@ const CHANNEL_COLORS = {
 
 function ChannelBadge({ channel }) {
   const ch = (channel ?? 'other').toLowerCase()
+  if (ch === 'squad' || ch === 'squad_payment') {
+    return (
+      <span className="inline-flex items-center px-2 py-1 rounded squad-gradient-bg glow-squad">
+        <img src="/squad-logo.svg" alt="Squad" className="h-2.5 w-auto brightness-[100] invert" />
+      </span>
+    )
+  }
   const cls = CHANNEL_COLORS[ch] ?? 'bg-[#1C2333] text-[#94A3B8] border-[#2D3748]'
   return (
     <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-medium border', cls)}>

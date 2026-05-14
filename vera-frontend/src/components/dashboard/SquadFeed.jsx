@@ -190,7 +190,9 @@ export function SquadFeed() {
                     <span className="text-sm text-[#F7F9FC] truncate">{truncate(receiverName, 20)}</span>
                   </div>
                   {isSquad && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 ml-2 shrink-0">Squad</span>
+                    <span className="inline-flex items-center px-2 py-1 rounded squad-gradient-bg ml-2 shrink-0">
+                      <img src="/squad-logo.svg" alt="Squad" className="h-2.5 w-auto brightness-[100] invert" />
+                    </span>
                   )}
                 </div>
                 <div className="flex items-center justify-between">
