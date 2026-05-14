@@ -1,15 +1,62 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
 import { GraphControls } from '@/components/graph/GraphControls'
 import { useGraphLayout } from '@/components/graph/useGraphLayout'
-import { useGraphData } from '@/hooks/useGraphData'
+import { useGraph } from '@/hooks/useGraph'
+import { useAlerts } from '@/hooks/useAlerts'
+import { deriveRiskLevel } from '@/utils/risk'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+
+function useFullGraph() {
+  const { data: graphData, isLoading: graphLoading } = useGraph()
+  const { data: alerts = [] } = useAlerts()
+
+  const { nodes: rawNodes, links: rawLinks } = useMemo(() => {
+    const nodes = graphData?.nodes ?? []
+    const links = graphData?.links ?? []
+
+    // Build a risk map from alert entity IDs → highest risk level
+    const riskMap = new Map()
+    alerts.forEach((alert) => {
+      const level = alert.riskLevel ?? deriveRiskLevel(alert.riskScore ?? 0)
+      ;(alert.entityIds ?? []).forEach((id) => {
+        const current = riskMap.get(id)
+        // HIGH > MEDIUM > LOW — keep the worst
+        if (!current || level === 'HIGH' || (level === 'MEDIUM' && current === 'LOW')) {
+          riskMap.set(id, level)
+        }
+      })
+    })
+
+    const normNodes = nodes
+      .filter((n) => n.id)
+      .map((n) => ({
+        id: n.id,
+        label: n.label ?? n.id,
+        type: n.type ?? 'account',
+        risk: riskMap.get(n.id) ?? 'LOW',
+      }))
+
+    const nodeIds = new Set(normNodes.map((n) => n.id))
+    const normLinks = links
+      .filter((l) => l.source && l.target && nodeIds.has(l.source) && nodeIds.has(l.target))
+      .map((l) => ({
+        source: l.source,
+        target: l.target,
+        value: parseFloat(l.amount ?? 50),
+      }))
+
+    return { nodes: normNodes, links: normLinks }
+  }, [graphData, alerts])
+
+  return { rawNodes, rawLinks, isLoading: graphLoading }
+}
 
 export default function GraphExplorer() {
   const navigate = useNavigate()
@@ -17,7 +64,7 @@ export default function GraphExplorer() {
   const [selectedNode, setSelectedNode] = useState(null)
   const [key, setKey] = useState(0)
 
-  const { nodes: rawNodes, links: rawLinks, isLoading } = useGraphData()
+  const { rawNodes, rawLinks, isLoading } = useFullGraph()
   const { nodes, links } = useGraphLayout(riskFilter, { nodes: rawNodes, links: rawLinks })
 
   return (
@@ -35,20 +82,23 @@ export default function GraphExplorer() {
         onReset={() => { setRiskFilter('ALL'); setKey((k) => k + 1) }}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 bg-[#0A0E1A] relative">
+      <div className="flex flex-1 overflow-hidden min-h-0">
+        {/* Canvas — flex-1 fills all remaining height */}
+        <div className="flex-1 bg-[#0A0E1A] relative min-h-0">
           {isLoading ? (
             <div className="flex items-center justify-center h-full"><Spinner size="lg" /></div>
-          ) : (
-            <div className="w-full" style={{ height: 'calc(100vh - 220px)' }}>
-              <GraphCanvas
-                key={key}
-                nodes={nodes}
-                links={links}
-                height={window.innerHeight - 220}
-                onNodeClick={setSelectedNode}
-              />
+          ) : nodes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-[#4B5563]">
+              <p className="text-sm">No graph data available</p>
+              <p className="text-xs font-mono">Ingest transactions to build the entity graph</p>
             </div>
+          ) : (
+            <GraphCanvas
+              key={key}
+              nodes={nodes}
+              links={links}
+              onNodeClick={setSelectedNode}
+            />
           )}
 
           {/* Legend */}
@@ -64,7 +114,7 @@ export default function GraphExplorer() {
 
         {/* Node Detail Panel */}
         {selectedNode && (
-          <div className="w-72 bg-[#111827] border-l border-[#2D3748] p-4 overflow-y-auto">
+          <div className="w-72 bg-[#111827] border-l border-[#2D3748] p-4 overflow-y-auto shrink-0">
             <div className="flex items-center justify-between mb-4">
               <p className="text-xs text-[#4B5563] uppercase tracking-wider">Node Details</p>
               <button onClick={() => setSelectedNode(null)} className="p-1 rounded text-[#4B5563] hover:text-[#F7F9FC] hover:bg-[#1C2333] transition-colors">
