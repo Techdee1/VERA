@@ -63,6 +63,11 @@ export default function STRDetail() {
     setDecisionLoading(true)
     try {
       await strApi.updateDecision(str.id, 'approved')
+      try {
+        await strApi.file(str.id)
+      } catch {
+        // filing failure is non-fatal — STR remains approved
+      }
       await queryClient.invalidateQueries({ queryKey: ['str', id] })
       await queryClient.invalidateQueries({ queryKey: ['strs'] })
       setApproveModal(false)

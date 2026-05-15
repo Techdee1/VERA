@@ -39,7 +39,7 @@ export default function AlertDetail() {
   const handleGenerateSTR = async () => {
     setStrLoading(true)
     try {
-      const draft = await strApi.generate(alert.id, reviewerNote || null)
+      const draft = await strApi.generate(alert.id, null, null, reviewerNote || null)
       toast.success('STR draft generated')
       navigate(`/str/${draft.id}`)
     } catch (err) {
