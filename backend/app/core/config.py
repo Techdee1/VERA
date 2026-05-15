@@ -1,6 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
@@ -18,22 +17,17 @@ class Settings(BaseSettings):
     groq_model: str = "llama-3.3-70b-versatile"
 
     # --- MULTI-TENANT SQUAD CONFIGURATION ---
-    # These match the keys provided for Alpha Remit, Quick Cash, Shell Co, and Musa Lawal
-    squad_secret_key_1: str = "" 
-    squad_secret_key_2: str = ""
-    squad_secret_key_3: str = ""
-    squad_secret_key_4: str = ""
+    # Secret keys for each merchant account in the Kano Ring demo
+    squad_secret_key_1: str = "" # Alpha Remit Ltd
+    squad_secret_key_2: str = "" # Quick Cash Services
+    squad_secret_key_3: str = "" # Shell Co Alpha Ltd
+    squad_secret_key_4: str = "" # Musa Lawal
     
-    # Legacy key for backward compatibility if needed
-    squad_secret_key: str = "" 
-    
-    squad_webhook_secret: str = ""
+    squad_webhook_secret: str = "" # Fallback or shared secret
     squad_merchant_id: str = "" 
     squad_api_base_url: str = "https://sandbox-api-d.squadco.com"
     squad_ussd_endpoint: str = "/transaction/initiate/process-payment"
     squad_transfer_endpoint: str = "/payout/transfer"
-    squad_webhook_url: str = ""
     squad_quarantine_account: str = ""
-
 
 settings = Settings()
