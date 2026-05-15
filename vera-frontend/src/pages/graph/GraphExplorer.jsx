@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { GraphCanvas } from '@/components/graph/GraphCanvas'
@@ -6,6 +6,7 @@ import { GraphControls } from '@/components/graph/GraphControls'
 import { useGraphLayout } from '@/components/graph/useGraphLayout'
 import { useGraph } from '@/hooks/useGraph'
 import { useAlerts } from '@/hooks/useAlerts'
+import { useSimulationStore } from '@/store/simulationStore'
 import { deriveRiskLevel } from '@/utils/risk'
 import { RiskBadge } from '@/components/ui/RiskBadge'
 import { Badge } from '@/components/ui/Badge'
@@ -67,6 +68,28 @@ export default function GraphExplorer() {
   const { rawNodes, rawLinks, isLoading } = useFullGraph()
   const { nodes, links } = useGraphLayout(riskFilter, { nodes: rawNodes, links: rawLinks })
 
+  // ── Simulation highlight ────────────────────────────────────────────────────
+  const { highlightedNodeId, trustScore, triggeredAlert, clearSimulation } = useSimulationStore()
+
+  // Inject the highlighted node as HIGH risk so it renders red, even if the
+  // graph data hasn't propagated the new alert yet
+  const patchedNodes = useMemo(() => {
+    if (!highlightedNodeId) return nodes
+    return nodes.map((n) =>
+      n.id === highlightedNodeId ? { ...n, risk: 'HIGH', _simHighlight: true } : n
+    )
+  }, [nodes, highlightedNodeId])
+
+  // Auto-select the highlighted node so the detail panel opens immediately
+  useEffect(() => {
+    if (!highlightedNodeId) return
+    const node = patchedNodes.find((n) => n.id === highlightedNodeId)
+    if (node) setSelectedNode(node)
+  }, [highlightedNodeId, patchedNodes])
+
+  // Clear simulation state when user navigates away
+  useEffect(() => () => clearSimulation(), [clearSimulation])
+
   return (
     <div className="flex flex-col h-full -m-6">
       <div className="px-6 pt-6 pb-0">
@@ -95,7 +118,7 @@ export default function GraphExplorer() {
           ) : (
             <GraphCanvas
               key={key}
-              nodes={nodes}
+              nodes={patchedNodes}
               links={links}
               onNodeClick={setSelectedNode}
             />
@@ -121,6 +144,35 @@ export default function GraphExplorer() {
                 <XMarkIcon className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Simulation highlight banner */}
+            {selectedNode._simHighlight && (
+              <div className="mb-4 p-3 rounded-lg bg-gradient-to-br from-[#BE185D]/20 to-[#F97316]/10 border border-[#BE185D]/40">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[#F97316] text-sm animate-pulse">⚡</span>
+                  <p className="text-xs font-semibold text-[#F97316]">Live Transaction Detected</p>
+                </div>
+                {triggeredAlert && (
+                  <p className="text-[10px] text-[#94A3B8] leading-relaxed">
+                    {triggeredAlert.reason ?? triggeredAlert.pattern_type ?? 'Fraud pattern flagged'}
+                  </p>
+                )}
+                {trustScore && (
+                  <div className="mt-2 pt-2 border-t border-[#BE185D]/20">
+                    <p className="text-[10px] text-[#4B5563] uppercase tracking-wider mb-1">Trust Score</p>
+                    <p className="text-xl font-bold font-mono text-red-400">
+                      {(parseFloat(trustScore.risk_score ?? trustScore.riskScore ?? 0) * 100).toFixed(1)}%
+                    </p>
+                    {trustScore.reason && (
+                      <p className="text-[10px] text-[#94A3B8] mt-1 leading-relaxed line-clamp-3">
+                        {trustScore.reason}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="space-y-3">
               <div>
                 <p className="text-base font-semibold text-[#F7F9FC]">{selectedNode.label}</p>

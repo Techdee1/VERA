@@ -5,6 +5,7 @@ import { TransactionVolumeChart } from '@/components/charts/TransactionVolumeCha
 import { AlertCard } from '@/components/alerts/AlertCard'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { SquadFeed } from '@/components/dashboard/SquadFeed'
+import { SquadLiveTrigger } from '@/components/squad/SquadLiveTrigger'
 import { useAlerts } from '@/hooks/useAlerts'
 import { useEntityTotal } from '@/hooks/useEntities'
 import { useSTRs } from '@/hooks/useSTR'
@@ -131,9 +132,36 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Squad Live Feed */}
-      <div className="mb-6">
-        <SquadFeed />
+      {/* Squad Live Feed + Trigger */}
+      <div className="mb-6 grid lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <SquadFeed />
+        </div>
+        <div className="flex flex-col gap-3">
+          {/* Live trigger card */}
+          <div className="bg-[#0D1117] border border-[#BE185D]/30 rounded-lg p-5 flex flex-col gap-4">
+            <div>
+              <p className="text-xs text-[#4B5563] uppercase tracking-wider font-medium mb-1">Fraud Detection Demo</p>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Trigger a live Squad payment and watch VERA detect fraud patterns in real time.
+              </p>
+            </div>
+            <SquadLiveTrigger />
+            <div className="pt-2 border-t border-[#1C2333] space-y-1">
+              {[
+                'Squad payment → VERA ingest',
+                'Fraud pattern detection',
+                'Entity trust scoring',
+                'Graph visualization',
+              ].map((step, i) => (
+                <div key={step} className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-[#BE185D]">{i + 1}</span>
+                  <span className="text-[10px] text-[#4B5563]">{step}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Responsible AI strip */}

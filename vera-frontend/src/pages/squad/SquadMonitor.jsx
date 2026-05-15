@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { SquadLiveTrigger } from '@/components/squad/SquadLiveTrigger'
 import { SquadMetrics } from '@/components/squad/SquadMetrics'
 import { SquadFlowChart } from '@/components/squad/SquadFlowChart'
 import { SquadActivityLog } from '@/components/squad/SquadActivityLog'
@@ -97,6 +98,11 @@ export default function SquadMonitor() {
 
       {/* Squad gradient divider */}
       <div className="h-px w-full squad-gradient-bg mb-6 rounded-full opacity-40" />
+
+      {/* Live fraud ring demo */}
+      <div className="mb-8">
+        <SquadLiveTrigger />
+      </div>
 
       <div className="mb-6">
         <SquadMetrics metrics={metrics} isLoading={txLoading} />
