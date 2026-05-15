@@ -17,9 +17,18 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
 
-    squad_secret_key: str = "" # Reverting to sandbox_sk for test
+    # --- MULTI-TENANT SQUAD CONFIGURATION ---
+    # These match the keys provided for Alpha Remit, Quick Cash, Shell Co, and Musa Lawal
+    squad_secret_key_1: str = "" 
+    squad_secret_key_2: str = ""
+    squad_secret_key_3: str = ""
+    squad_secret_key_4: str = ""
+    
+    # Legacy key for backward compatibility if needed
+    squad_secret_key: str = "" 
+    
     squad_webhook_secret: str = ""
-    squad_merchant_id: str = "" # Replace with your actual Squad Merchant ID from the dashboard
+    squad_merchant_id: str = "" 
     squad_api_base_url: str = "https://sandbox-api-d.squadco.com"
     squad_ussd_endpoint: str = "/transaction/initiate/process-payment"
     squad_transfer_endpoint: str = "/payout/transfer"
