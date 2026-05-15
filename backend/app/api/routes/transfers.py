@@ -17,7 +17,7 @@ async def initiate_demo_transfer(payload: TransferRequest):
     VERA calls Squad -> Squad processes -> Squad sends Webhook to you.
     """
     headers = {
-        "Authorization": f"Bearer {settings.squad_secret_key}",
+        "Authorization": f"Bearer {settings.squad_secret_key_1}",
         "Content-Type": "application/json"
     }
     
@@ -50,7 +50,7 @@ async def simulate_squad_webhook(payload: SimulateWebhookRequest):
     If the internet is slow, use this to force Squad to send the webhook 
     to your ngrok URL immediately.
     """
-    headers = {"Authorization": f"Bearer {settings.squad_secret_key}"}
+    headers = {"Authorization": f"Bearer {settings.squad_secret_key_1}"}
     
     async with httpx.AsyncClient() as client:
         response = await client.post(

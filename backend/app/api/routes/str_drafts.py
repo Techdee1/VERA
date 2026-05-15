@@ -113,7 +113,7 @@ def file_str(
         )
 
     squad_ref: str | None = None
-    if settings.squad_secret_key:
+    if settings.squad_secret_key_1:
         try:
             payload = {
                 "amount": 100,  # nominal filing fee in kobo
@@ -122,7 +122,7 @@ def file_str(
                 "transaction_ref": f"STR-FILE-{str_id}",
                 "description": f"VERA STR filing: {str_id}",
             }
-            headers = {"Authorization": f"Bearer {settings.squad_secret_key}"}
+            headers = {"Authorization": f"Bearer {settings.squad_secret_key_1}"}
             with httpx.Client(timeout=15.0) as client:
                 resp = client.post(
                     f"{settings.squad_api_base_url}/transaction/initiate",

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 class SquadService:
     def __init__(self):
         self.headers = {
-            "Authorization": f"Bearer {settings.squad_secret_key}",
+            "Authorization": f"Bearer {settings.squad_secret_key_1}",
             "Content-Type": "application/json"
         }
 
@@ -27,7 +27,7 @@ class SquadService:
             "amount": int(float(payload.get("amount", 0)) * 100), # Amount in kobo
             "pass_charge": False,
             "currency": "NGN",
-            "webhook_url": settings.squad_webhook_url,
+            "webhook_url": settings.squad_webhook_url,  # set via SQUAD_WEBHOOK_URL env var
             "ussd": {
                 "bank_code": payload.get("bank_code", "058") # Default to GTB if not provided
             },
