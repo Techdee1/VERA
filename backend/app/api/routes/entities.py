@@ -30,8 +30,14 @@ def list_entities(
     q: str | None = Query(default=None, max_length=200),
     db: Session = Depends(get_db),
 ) -> EntityListResponse:
-    # Exclude synthetic entities (CHAIN-*, SIM-*, RESET-*, quarantine) — they carry external_id
-    stmt = select(Entity).where(~Entity.metadata_json.op("?")(  "external_id"))
+    # Hide synthetic entities (CHAIN-*, SIM-*, RESET-*, quarantine) UNLESS they are frozen.
+    # Frozen synthetic entities must appear so compliance officers can find and review them.
+    stmt = select(Entity).where(
+        or_(
+            ~Entity.metadata_json.op("?")("external_id"),   # real seeded entities
+            Entity.metadata_json.op("?")("frozen"),          # frozen fraud entities
+        )
+    )
     if q:
         term = f"%{q.strip()}%"
         stmt = stmt.where(
