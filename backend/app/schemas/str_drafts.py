@@ -34,7 +34,14 @@ class STRDraftResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class EnforcementResult(BaseModel):
+    frozen_count: int
+    frozen_entities: list[dict]
+    quarantine_entity_id: str | None = None
+
+
 class STRFileResponse(BaseModel):
     str_id: UUID
     squad_transaction_ref: str
     status: str
+    enforcement: EnforcementResult | None = None

@@ -125,10 +125,15 @@ async def demo_reset():
 
         # Delete all demo transactions and entities
         db.execute(text(
-            "DELETE FROM transactions WHERE channel IN ('squad', 'squad_chain', 'squad_simulate', 'demo_reset')"
+            "DELETE FROM transactions WHERE channel IN ('squad', 'squad_chain', 'squad_simulate', 'demo_reset', 'enforcement')"
         ))
         db.execute(text(
             "DELETE FROM entities WHERE metadata_json::jsonb ? 'external_id'"
+        ))
+        # Unfreeze any seeded entities that were frozen during a prior demo
+        db.execute(text(
+            "UPDATE entities SET metadata_json = metadata_json - 'frozen' - 'frozen_at' - 'frozen_str_id' "
+            "WHERE metadata_json::jsonb ? 'frozen'"
         ))
         # Wipe alerts, STR drafts, audit log (raw SQL bypasses immutability listener)
         db.execute(text("TRUNCATE TABLE str_drafts, audit_log, alerts CASCADE"))

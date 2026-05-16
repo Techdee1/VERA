@@ -27,6 +27,7 @@ export default function STRDetail() {
   const [rejectModal, setRejectModal] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [decisionLoading, setDecisionLoading] = useState(false)
+  const [enforcement, setEnforcement] = useState(null)
 
   const entityIds = alert?.entityIds ?? []
   const entityQueries = useQueries({
@@ -64,14 +65,15 @@ export default function STRDetail() {
     try {
       await strApi.updateDecision(str.id, 'approved')
       try {
-        await strApi.file(str.id)
+        const fileResult = await strApi.file(str.id)
+        if (fileResult?.enforcement) setEnforcement(fileResult.enforcement)
       } catch {
         // filing failure is non-fatal — STR remains approved
       }
       await queryClient.invalidateQueries({ queryKey: ['str', id] })
       await queryClient.invalidateQueries({ queryKey: ['strs'] })
       setApproveModal(false)
-      toast.success(`STR ${str.id} approved`)
+      toast.success(`STR ${str.id} approved — ${enforcement?.frozen_count ?? 0} accounts frozen`)
     } catch (err) {
       const detail = err?.response?.data?.detail
       toast.error(typeof detail === 'string' ? detail : 'Failed to approve STR — please try again')
@@ -114,6 +116,34 @@ export default function STRDetail() {
           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-bold shrink-0">S</span>
           <span className="text-sm text-green-400 font-medium">Filed via Squad</span>
           <span className="text-xs text-[#94A3B8] font-mono truncate">{str.squadRef}</span>
+        </div>
+      )}
+
+      {/* Enforcement action banner — shown after accounts are frozen */}
+      {enforcement && (
+        <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-red-500/20">
+            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold shrink-0">!</span>
+            <span className="text-sm font-semibold text-red-400">Enforcement Executed</span>
+            <span className="ml-auto text-xs text-[#94A3B8]">{enforcement.frozen_count} account{enforcement.frozen_count !== 1 ? 's' : ''} frozen · Funds transferred to compliance quarantine</span>
+          </div>
+          <div className="px-4 py-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {enforcement.frozen_entities?.map((e) => (
+              <div key={e.entity_id} className="flex items-center gap-2 bg-[#1C2333] rounded-md px-3 py-2">
+                <span className="text-[10px] font-bold text-red-400 bg-red-500/20 rounded px-1.5 py-0.5 shrink-0">FROZEN</span>
+                <div className="min-w-0">
+                  <p className="text-xs text-[#F7F9FC] truncate">{e.name}</p>
+                  <p className="text-[10px] text-[#4B5563] font-mono truncate">{e.entity_id}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {enforcement.quarantine_entity_id && (
+            <div className="px-4 py-2 bg-[#0D1117] border-t border-red-500/10 flex items-center gap-2">
+              <span className="text-[10px] text-[#4B5563]">Quarantine account:</span>
+              <span className="text-[10px] text-[#94A3B8] font-mono">{enforcement.quarantine_entity_id}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -167,9 +197,14 @@ export default function STRDetail() {
 
       {/* Approve modal */}
       <Modal open={approveModal} onClose={() => !decisionLoading && setApproveModal(false)} title="Approve STR">
-        <p className="text-sm text-[#94A3B8] mb-4">
-          You are approving <strong className="text-[#F7F9FC]">{str.id}</strong>. This will be recorded in the audit trail.
+        <p className="text-sm text-[#94A3B8] mb-3">
+          You are approving and filing <strong className="text-[#F7F9FC]">{str.id}</strong>. This will:
         </p>
+        <ul className="text-sm text-[#94A3B8] space-y-1 mb-4 list-none">
+          <li className="flex items-center gap-2"><span className="text-red-400">•</span> Freeze all flagged accounts immediately</li>
+          <li className="flex items-center gap-2"><span className="text-amber-400">•</span> Transfer funds to the VERA compliance quarantine account</li>
+          <li className="flex items-center gap-2"><span className="text-[#00D4AA]">•</span> Submit this STR to the NFIU audit trail</li>
+        </ul>
         {str.payloadHash && (
           <div className="bg-[#1C2333] border border-[#2D3748] rounded-md p-3 mb-4">
             <p className="text-[10px] text-[#4B5563] font-mono break-all">Hash: {str.payloadHash}</p>

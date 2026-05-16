@@ -3,16 +3,27 @@ import { RiskBadge } from '@/components/ui/RiskBadge'
 import { Badge } from '@/components/ui/Badge'
 
 export function EntityCard({ entity }) {
+  const isFrozen = entity.metadataJson?.frozen || entity.metadata_json?.frozen
+
   return (
     <Link
       to={`/entities/${entity.id}`}
-      className="group block bg-[#111827] border border-[#2D3748] rounded-lg p-4 hover:border-[#00D4AA]/40 transition-colors"
+      className={`group block rounded-lg p-4 transition-colors ${
+        isFrozen
+          ? 'bg-red-950/30 border border-red-500/40 hover:border-red-400/60'
+          : 'bg-[#111827] border border-[#2D3748] hover:border-[#00D4AA]/40'
+      }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-[#F7F9FC] group-hover:text-[#00D4AA] transition-colors">
-            {entity.canonicalName}
-          </p>
+          <div className="flex items-center gap-2 mb-0.5">
+            <p className="text-sm font-medium text-[#F7F9FC] group-hover:text-[#00D4AA] transition-colors">
+              {entity.canonicalName}
+            </p>
+            {isFrozen && (
+              <span className="text-[10px] font-bold text-red-400 bg-red-500/20 rounded px-1.5 py-0.5">FROZEN</span>
+            )}
+          </div>
           <p className="text-xs text-[#4B5563] font-mono mt-0.5">{entity.id}</p>
           {entity.bvn && <p className="text-xs text-[#4B5563] font-mono">BVN: {entity.bvn}</p>}
         </div>
