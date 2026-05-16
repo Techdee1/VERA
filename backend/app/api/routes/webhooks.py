@@ -181,11 +181,17 @@ async def demo_reset():
             ))
         db.flush()
 
+        # Capture IDs before session closes (attributes expire on session close)
+        injected_entity_ids = (
+            [str(e.id) for e in chain_objs]
+            + [str(e.id) for e in pos_sources]
+            + [str(pos_beneficiary.id)]
+        )
+
         # Run detection — fires layered chain + POS ring + shell director web from seeded data
         run_heuristic_detection(db)
         db.commit()
 
-    injected_ids = [str(e.id) for e in chain_objs] + [str(e.id) for e in pos_sources] + [str(pos_beneficiary.id)]
     results["postgres"] = (
         f"cleared {len(demo_entity_ids)} old demo entities; "
         f"injected layered chain + POS ring showcase; alerts regenerated"
@@ -194,7 +200,6 @@ async def demo_reset():
     # Remove old demo nodes from Neo4j
     try:
         with neo4j_driver.session() as session:
-            all_demo_ids = demo_entity_ids + injected_ids
             if demo_entity_ids:
                 session.run(
                     "MATCH (e:Entity) WHERE e.entity_id IN $ids DETACH DELETE e",
