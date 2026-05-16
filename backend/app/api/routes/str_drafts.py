@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.deps import get_db
 from app.models import Alert, Entity, STRDraft, Transaction
-from app.models.enums import DecisionStatus
+from app.models.enums import AlertStatus, DecisionStatus
 from app.schemas.str_drafts import EnforcementResult, STRDecisionUpdate, STRDraftResponse, STRFileResponse, STRGenerateRequest, STRListResponse
 from app.services.audit_service import write_audit_event
 from app.services.str_service import STRGenerationError, generate_str_draft, get_str_draft
@@ -225,6 +225,11 @@ def file_str(
 
     # Run enforcement: freeze entities + quarantine transfers
     enforcement = _execute_enforcement(db, draft)
+
+    # Close the alert now that the STR has been filed
+    alert_obj = db.scalar(select(Alert).where(Alert.id == draft.alert_id))
+    if alert_obj:
+        alert_obj.status = AlertStatus.closed
 
     # Persist Squad ref + enforcement summary in the draft
     meta = dict(draft.content_json or {})

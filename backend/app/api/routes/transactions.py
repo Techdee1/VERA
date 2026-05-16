@@ -64,7 +64,10 @@ def list_recent_transactions(
     db: Session = Depends(get_db),
 ) -> list[TransactionRecentResponse]:
     rows = db.scalars(
-        select(Transaction).order_by(Transaction.occurred_at.desc()).limit(limit)
+        select(Transaction)
+        .where(Transaction.channel.notin_(["enforcement", "demo_reset"]))
+        .order_by(Transaction.occurred_at.desc())
+        .limit(limit)
     ).all()
 
     entity_ids = {r.source_entity_id for r in rows} | {r.destination_entity_id for r in rows}

@@ -97,9 +97,9 @@ async def demo_reset():
     """Reset to a clean demo state with one alert of each pattern type visible.
 
     Removes all Squad/chain/simulate data, wipes alerts, then injects:
-    - 1 layered transfer chain  (SIM-* entities, fresh timestamps)
-    - 1 POS cash-out ring       (SIM-POS-* entities, fresh timestamps)
-    Shell director web fires automatically from the seeded business entities.
+    - 1 POS cash-out ring  (RESET-POS-* entities, fresh timestamps)
+    Shell director web fires from seeded business entities.
+    Layered transfer chain is triggered live via the Simulate button.
     """
     from sqlalchemy import text
     from app.core.neo4j_client import neo4j_driver
@@ -139,34 +139,8 @@ async def demo_reset():
         db.execute(text("TRUNCATE TABLE str_drafts, audit_log, alerts CASCADE"))
         db.commit()
 
-        # --- Inject showcase: layered transfer chain (3 hops, 4 entities) ---
-        now = datetime.now(timezone.utc)
-        chain_entities = [
-            ("RESET-ALPHA-REMIT",   "Alpha Remit Ltd"),
-            ("RESET-QUICK-CASH",    "Quick Cash Services"),
-            ("RESET-SHELL-CO",      "Shell Co Alpha Ltd"),
-            ("RESET-MUSA-LAWAL",    "Musa Lawal"),
-        ]
-        chain_objs = [
-            _get_or_create_entity(db, ext_id, name)
-            for ext_id, name in chain_entities
-        ]
-        db.flush()
-        chain_amounts = [Decimal("250000"), Decimal("220000"), Decimal("190000")]
-        for i in range(3):
-            db.add(Transaction(
-                source_entity_id=chain_objs[i].id,
-                destination_entity_id=chain_objs[i + 1].id,
-                amount=chain_amounts[i],
-                currency="NGN",
-                occurred_at=now - timedelta(minutes=(30 - i * 10)),
-                reference=f"RESET-CHAIN-{i + 1}-{uuid4().hex[:8].upper()}",
-                channel="demo_reset",
-                metadata_json={"demo": True, "chain_step": i + 1},
-            ))
-        db.flush()
-
         # --- Inject showcase: POS cash-out ring (6 sources → 1 beneficiary) ---
+        now = datetime.now(timezone.utc)
         pos_sources = [
             _get_or_create_entity(db, f"RESET-POS-SRC-{j}", f"POS Source {j}")
             for j in range(1, 7)
@@ -188,18 +162,18 @@ async def demo_reset():
 
         # Capture IDs before session closes (attributes expire on session close)
         injected_entity_ids = (
-            [str(e.id) for e in chain_objs]
-            + [str(e.id) for e in pos_sources]
+            [str(e.id) for e in pos_sources]
             + [str(pos_beneficiary.id)]
         )
 
-        # Run detection — fires layered chain + POS ring + shell director web from seeded data
+        # Run detection — fires POS ring + shell director web from seeded data
+        # Layered chain is triggered live via the Simulate button
         run_heuristic_detection(db)
         db.commit()
 
     results["postgres"] = (
         f"cleared {len(demo_entity_ids)} old demo entities; "
-        f"injected layered chain + POS ring showcase; alerts regenerated"
+        f"injected POS ring showcase; alerts regenerated"
     )
 
     # Remove old demo nodes from Neo4j
@@ -246,12 +220,17 @@ async def squad_webhook_simulate():
         {
             "sender_id": "SIM-QUICK-CASH",  "sender_name": "Quick Cash Services",
             "recv_id":   "SIM-SHELL-CO",    "recv_name":   "Shell Co Alpha Ltd",
-            "amount": Decimal("180000"),
+            "amount": Decimal("400000"),
         },
         {
             "sender_id": "SIM-SHELL-CO",    "sender_name": "Shell Co Alpha Ltd",
             "recv_id":   "SIM-MUSA-LAWAL",  "recv_name":   "Musa Lawal",
-            "amount": Decimal("160000"),
+            "amount": Decimal("600000"),
+        },
+        {
+            "sender_id": "SIM-MUSA-LAWAL",  "sender_name": "Musa Lawal",
+            "recv_id":   "SIM-FINAL-BEN",   "recv_name":   "Final Beneficiary",
+            "amount": Decimal("800000"),
         },
     ]
     asyncio.create_task(_process_simulate_ring(chain))

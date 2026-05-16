@@ -134,7 +134,12 @@ export function SquadFeed() {
     if (simStep === -1) {
       return <>✓ Kano Ring Complete</>
     }
-    return <>⚡ Simulate Kano Shell Ring</>
+    return (
+      <>
+        <img src="/squad-logo.svg" alt="Squad" className="h-3 w-auto brightness-0 invert opacity-70" />
+        Simulate Kano Shell Ring
+      </>
+    )
   }
 
   return (
@@ -176,7 +181,8 @@ export function SquadFeed() {
           transactions.slice(0, 8).map((txn) => {
             const riskScore = parseFloat(txn.risk_score ?? txn.riskScore ?? 0)
             const borderColor = getRiskColor(riskScore)
-            const isSquad = txn.channel === 'squad' || txn.channel === 'squad_payment'
+            const isSquadReal = txn.channel === 'squad' || txn.channel === 'squad_payment'
+            const isSquadSim = txn.channel === 'squad_simulate' || txn.channel === 'squad_chain'
             const senderName = txn.from_entity_name ?? txn.fromEntityName ?? txn.fromEntity ?? txn.from_entity ?? txn.id
             const receiverName = txn.to_entity_name ?? txn.toEntityName ?? txn.toEntity ?? txn.to_entity ?? '—'
             const timestamp = txn.date ?? txn.created_at ?? txn.createdAt
@@ -189,9 +195,15 @@ export function SquadFeed() {
                     <span className="text-[#4B5563]">→</span>
                     <span className="text-sm text-[#F7F9FC] truncate">{truncate(receiverName, 20)}</span>
                   </div>
-                  {isSquad && (
+                  {isSquadReal && (
                     <span className="inline-flex items-center px-2 py-1 rounded squad-gradient-bg ml-2 shrink-0">
                       <img src="/squad-logo.svg" alt="Squad" className="h-2.5 w-auto brightness-[100] invert" />
+                    </span>
+                  )}
+                  {isSquadSim && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/15 border border-amber-500/30 ml-2 shrink-0">
+                      <img src="/squad-logo.svg" alt="Squad" className="h-2 w-auto brightness-0 invert opacity-60" />
+                      <span className="text-[9px] font-bold text-amber-400 tracking-wider">SIM</span>
                     </span>
                   )}
                 </div>
