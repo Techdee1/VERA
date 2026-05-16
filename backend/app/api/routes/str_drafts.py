@@ -72,9 +72,12 @@ def update_str_decision(
     draft = db.scalar(select(STRDraft).where(STRDraft.id == str_id))
     if draft is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="STR draft not found")
+    requested = DecisionStatus(body.decision)
     if draft.decision != DecisionStatus.pending:
+        if draft.decision == requested:
+            return get_str_draft(db=db, str_id=str_id)  # idempotent — already at this decision
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Decision already recorded")
-    draft.decision = DecisionStatus(body.decision)
+    draft.decision = requested
     write_audit_event(
         db=db,
         action="str_decision_updated",

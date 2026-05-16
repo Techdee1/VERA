@@ -30,7 +30,8 @@ def list_entities(
     q: str | None = Query(default=None, max_length=200),
     db: Session = Depends(get_db),
 ) -> EntityListResponse:
-    stmt = select(Entity)
+    # Exclude synthetic entities (CHAIN-*, SIM-*, RESET-*, quarantine) — they carry external_id
+    stmt = select(Entity).where(~Entity.metadata_json.op("?")(  "external_id"))
     if q:
         term = f"%{q.strip()}%"
         stmt = stmt.where(
