@@ -37,12 +37,13 @@ MERCHANT_CHAIN_ORDER = [
     "Musa Lawal",
 ]
 
-# Stable entity IDs shared with the /simulate endpoint so both paths converge
+# Stable entity IDs for real-payment chain hops — deliberately different from
+# SIM-* simulate entities so a prior simulate run cannot block detection here
 CHAIN_ENTITY_IDS = {
-    "Alpha Remit Ltd":     "SIM-ALPHA-REMIT",
-    "Quick Cash Services": "SIM-QUICK-CASH",
-    "Shell Co Alpha Ltd":  "SIM-SHELL-CO",
-    "Musa Lawal":          "SIM-MUSA-LAWAL",
+    "Alpha Remit Ltd":     "CHAIN-ALPHA-REMIT",
+    "Quick Cash Services": "CHAIN-QUICK-CASH",
+    "Shell Co Alpha Ltd":  "CHAIN-SHELL-CO",
+    "Musa Lawal":          "CHAIN-MUSA-LAWAL",
 }
 
 
@@ -133,6 +134,22 @@ async def process_squad_webhook(payload: Dict[str, Any]):
 
             sender_entity = _get_or_create_entity(db, sender_id, data.get("sender_name") or sender_id)
             receiver_entity = _get_or_create_entity(db, receiver_id, merchant_name)
+
+            # Write arrival audit event — powers the Webhooks tab in Squad Monitor
+            write_audit_event(
+                db=db,
+                action="squad_webhook_enqueued",
+                entity_ids=[str(sender_entity.id), str(receiver_entity.id)],
+                alert_id=None,
+                model_version="webhook_v1",
+                decision=DecisionStatus.pending,
+                payload_json={
+                    "merchant": merchant_name,
+                    "ref": data.get("transaction_ref", ""),
+                    "amount": str(_parse_amount(data)),
+                },
+            )
+            db.flush()
 
             ingest_item = TransactionIngestItem(
                 source_entity_id=sender_entity.id,
