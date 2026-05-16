@@ -163,11 +163,8 @@ def _risk_score(base: Decimal, bump: Decimal) -> Decimal:
 
 
 def _detect_pos_cash_out_ring(db: Session, ctx: DetectionContext) -> int:
-    cutoff = ctx.now - timedelta(hours=72)
-    recent = [tx for tx in ctx.transactions if _ensure_utc(tx.occurred_at) >= cutoff]
-
     by_beneficiary: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
-    for tx in recent:
+    for tx in ctx.transactions:
         by_beneficiary[tx.destination_entity_id].append(tx)
 
     existing = _existing_fingerprints(db, PatternType.pos_cash_out_ring)
@@ -207,7 +204,6 @@ def _detect_pos_cash_out_ring(db: Session, ctx: DetectionContext) -> int:
                 "beneficiary_id": str(beneficiary_id),
                 "source_count": len(source_ids),
                 "total_volume": f"{total_amount:.2f}",
-                "window_hours": 72,
                 "anomaly_score": anomaly_summary["anomaly_score"],
                 "anomaly_confidence": anomaly_summary["anomaly_confidence"],
                 "anomaly_flag": anomaly_summary["anomaly_flag"],
@@ -316,15 +312,9 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
     existing = _existing_fingerprints(db, PatternType.layered_transfer_chain)
     created = 0
 
-    end_time = ctx.now
-    window_start = end_time - timedelta(hours=48)
-
-    # Only consider transactions within the window
-    windowed = [tx for tx in ctx.transactions if window_start <= _ensure_utc(tx.occurred_at) <= end_time]
-
     outbound: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
     all_receivers: set[uuid.UUID] = set()
-    for tx in windowed:
+    for tx in ctx.transactions:
         outbound[tx.source_entity_id].append(tx)
         all_receivers.add(tx.destination_entity_id)
 
@@ -377,7 +367,6 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
                 "origin_id": str(origin_id),
                 "destination_id": str(destination_id),
                 "chain_length": len(chain_txs),
-                "window_hours": 48,
                 "anomaly_score": anomaly_summary["anomaly_score"],
                 "anomaly_confidence": anomaly_summary["anomaly_confidence"],
                 "anomaly_flag": anomaly_summary["anomaly_flag"],
