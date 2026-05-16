@@ -64,16 +64,27 @@ export default function STRDetail() {
     setDecisionLoading(true)
     try {
       await strApi.updateDecision(str.id, 'approved')
+
+      let enforcementResult = null
       try {
         const fileResult = await strApi.file(str.id)
-        if (fileResult?.enforcement) setEnforcement(fileResult.enforcement)
-      } catch {
-        // filing failure is non-fatal — STR remains approved
+        enforcementResult = fileResult?.enforcement ?? null
+        if (enforcementResult) setEnforcement(enforcementResult)
+      } catch (fileErr) {
+        console.error('STR filing/enforcement error:', fileErr?.response?.data ?? fileErr)
+        toast.warning('STR approved but enforcement action failed — see console for details')
       }
+
       await queryClient.invalidateQueries({ queryKey: ['str', id] })
       await queryClient.invalidateQueries({ queryKey: ['strs'] })
       setApproveModal(false)
-      toast.success(`STR ${str.id} approved — ${enforcement?.frozen_count ?? 0} accounts frozen`)
+
+      const frozenCount = enforcementResult?.frozen_count ?? 0
+      if (frozenCount > 0) {
+        toast.success(`STR filed — ${frozenCount} account${frozenCount !== 1 ? 's' : ''} frozen & transferred to quarantine`)
+      } else {
+        toast.success(`STR ${str.id.slice(0, 8)} approved and filed`)
+      }
     } catch (err) {
       const detail = err?.response?.data?.detail
       toast.error(typeof detail === 'string' ? detail : 'Failed to approve STR — please try again')
