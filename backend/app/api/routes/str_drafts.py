@@ -216,6 +216,8 @@ def file_str(
                 )
             if resp.status_code < 400:
                 squad_ref = resp.json().get("data", {}).get("transaction_ref") or f"STR-FILE-{str_id}"
+            else:
+                squad_ref = f"STR-FILE-{str_id}-OFFLINE"
         except Exception:
             squad_ref = f"STR-FILE-{str_id}-OFFLINE"
     else:

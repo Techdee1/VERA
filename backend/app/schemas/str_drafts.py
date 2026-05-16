@@ -42,6 +42,6 @@ class EnforcementResult(BaseModel):
 
 class STRFileResponse(BaseModel):
     str_id: UUID
-    squad_transaction_ref: str
+    squad_transaction_ref: str | None = None
     status: str
     enforcement: EnforcementResult | None = None
