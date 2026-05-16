@@ -53,6 +53,7 @@ def list_entities(
                 full_name=row.full_name,
                 address=row.address,
                 created_at=row.created_at,
+                metadata_json=row.metadata_json or {},
             )
             for row in rows
         ],

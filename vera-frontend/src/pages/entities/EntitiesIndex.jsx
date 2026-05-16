@@ -9,7 +9,19 @@ import { formatDate } from '@/utils/formatters'
 
 const columns = [
   { accessorKey: 'id', header: 'Entity ID', cell: ({ getValue }) => <span className="font-mono text-xs text-[#94A3B8]">{getValue()}</span> },
-  { accessorKey: 'canonicalName', header: 'Name', cell: ({ getValue }) => <span className="text-sm text-[#F7F9FC] font-medium">{getValue()}</span> },
+  {
+    accessorKey: 'canonicalName',
+    header: 'Name',
+    cell: ({ getValue, row }) => {
+      const frozen = row.original.metadata_json?.frozen || row.original.metadataJson?.frozen
+      return (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-[#F7F9FC] font-medium">{getValue()}</span>
+          {frozen && <span className="text-[10px] font-bold text-red-400 bg-red-500/20 rounded px-1.5 py-0.5 shrink-0">FROZEN</span>}
+        </div>
+      )
+    },
+  },
   { accessorKey: 'entityType', header: 'Type', cell: ({ getValue }) => <Badge>{getValue()}</Badge> },
   { accessorKey: 'bvn', header: 'BVN', cell: ({ getValue }) => <span className="font-mono text-xs text-[#94A3B8]">{getValue() ?? '—'}</span> },
   { accessorKey: 'address', header: 'Address', cell: ({ getValue }) => <span className="text-xs text-[#94A3B8] truncate max-w-xs block">{getValue() ?? '—'}</span> },

@@ -58,9 +58,23 @@ export default function EntityDetail() {
   const hasNeighbours  = neighbors.length > 0
   const hasAlerts      = linkedAlerts.length > 0
 
+  const isFrozen = entity.metadata_json?.frozen || entity.metadataJson?.frozen
+
   return (
     <div className="space-y-4">
       <PageHeader backTo="/entities" title={entity.canonicalName} subtitle={entity.id} />
+
+      {isFrozen && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/40 rounded-lg">
+          <span className="text-[10px] font-bold text-red-400 bg-red-500/20 rounded px-2 py-1">FROZEN</span>
+          <div>
+            <p className="text-sm font-semibold text-red-400">Account Frozen by VERA Compliance</p>
+            <p className="text-xs text-[#94A3B8]">
+              Frozen {entity.metadata_json?.frozen_at ? new Date(entity.metadata_json.frozen_at).toLocaleString() : ''} · STR {entity.metadata_json?.frozen_str_id?.slice(0, 8)}…
+            </p>
+          </div>
+        </div>
+      )}
 
       <EntityTrustScoreCard entityId={id} />
 

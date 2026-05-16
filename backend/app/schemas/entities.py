@@ -34,6 +34,7 @@ class EntityListItem(BaseModel):
     full_name: str | None
     address: str | None
     created_at: datetime
+    metadata_json: dict = {}
 
 
 class EntityListResponse(BaseModel):
