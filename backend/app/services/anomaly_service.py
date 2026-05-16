@@ -10,8 +10,7 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
-ROOT_DIR = Path(__file__).resolve().parents[3]
-MODEL_DIR = ROOT_DIR / "models"
+MODEL_DIR = Path(os.getenv("MODEL_DIR", str(Path(__file__).resolve().parents[2] / "models")))
 MODEL_PATH = MODEL_DIR / "isolation_forest.joblib"
 SCALER_PATH = MODEL_DIR / "scaler.joblib"
 

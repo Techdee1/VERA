@@ -18,6 +18,7 @@ venv/
 node_modules/
 agent/.lua/
 models/
+!backend/models/
 q-dev-chat*.md
 *.backup
 docs/DEPLOYMENT_TEST_RESULTS.md
