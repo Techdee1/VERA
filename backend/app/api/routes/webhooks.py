@@ -29,6 +29,22 @@ MERCHANT_KEYS = [
     {"key": settings.squad_secret_key_4, "name": "Musa Lawal"},
 ]
 
+# Ordered chain for synthetic layering hops — each real payment advances one step
+MERCHANT_CHAIN_ORDER = [
+    "Alpha Remit Ltd",
+    "Quick Cash Services",
+    "Shell Co Alpha Ltd",
+    "Musa Lawal",
+]
+
+# Stable entity IDs shared with the /simulate endpoint so both paths converge
+CHAIN_ENTITY_IDS = {
+    "Alpha Remit Ltd":     "SIM-ALPHA-REMIT",
+    "Quick Cash Services": "SIM-QUICK-CASH",
+    "Shell Co Alpha Ltd":  "SIM-SHELL-CO",
+    "Musa Lawal":          "SIM-MUSA-LAWAL",
+}
+
 
 async def verify_multi_merchant_signature(request: Request, x_squad_encrypted_body: str = Header(None)):
     """Validates HMAC-SHA512 by trying all registered merchant secret keys."""
@@ -100,7 +116,7 @@ async def squad_webhook_simulate():
 
 
 async def process_squad_webhook(payload: Dict[str, Any]):
-    """Builds the entity graph and queues the transaction for ingest."""
+    """Records the real customer→merchant payment then writes one synthetic chain hop for detection."""
     db_factory = get_session_factory()
     merchant_name = payload.get("_verified_merchant", "Unknown Merchant")
 
@@ -129,7 +145,37 @@ async def process_squad_webhook(payload: Dict[str, Any]):
                 metadata_json={"tenant": merchant_name},
             )
             create_ingest_job(db=db, payload=ingest_item)
-            db.commit()
+            # create_ingest_job commits internally; session stays open
+
+            # Synthetic chain hop — advances the layered transfer chain one step per payment.
+            # Payment 1 (Alpha Remit)  → writes Alpha Remit  → Quick Cash   (1 hop)
+            # Payment 2 (Quick Cash)   → writes Quick Cash   → Shell Co     (2 hops)
+            # Payment 3 (Shell Co)     → writes Shell Co     → Musa Lawal   (3 hops → alert fires)
+            # Payment 4 (Musa Lawal)   → terminal, no hop written
+            try:
+                chain_idx = MERCHANT_CHAIN_ORDER.index(merchant_name)
+            except ValueError:
+                chain_idx = -1
+
+            if 0 <= chain_idx < len(MERCHANT_CHAIN_ORDER) - 1:
+                next_name = MERCHANT_CHAIN_ORDER[chain_idx + 1]
+                this_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[merchant_name], merchant_name)
+                next_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[next_name], next_name)
+                chain_tx = Transaction(
+                    source_entity_id=this_chain.id,
+                    destination_entity_id=next_chain.id,
+                    amount=_parse_amount(data),
+                    currency="NGN",
+                    occurred_at=datetime.now(timezone.utc),
+                    reference=f"CHAIN-{chain_idx + 1}-{uuid4().hex[:8].upper()}",
+                    channel="squad_chain",
+                    metadata_json={"chain_step": chain_idx + 1, "merchant": merchant_name},
+                )
+                db.add(chain_tx)
+                db.flush()
+                run_heuristic_detection(db)
+                db.commit()
+                logger.info(f"Chain hop {chain_idx + 1}: {merchant_name} → {next_name}")
 
         except Exception as e:
             logger.error(f"Background processing failure: {e}", exc_info=True)

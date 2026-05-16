@@ -357,8 +357,8 @@ export function SquadLiveTrigger() {
       pollRef.current = setInterval(async () => {
         if (abortRef.current) { stopPolling(); resolve(false); return }
 
-        // Stop polling after 30s — no alert means continue to next payment
-        if (Date.now() - start > 30_000) { stopPolling(); resolve(false); return }
+        // Stop polling after 8s — no alert means continue to next payment
+        if (Date.now() - start > 8_000) { stopPolling(); resolve(false); return }
 
         try {
           const data   = await alertsApi.getAll(500)
