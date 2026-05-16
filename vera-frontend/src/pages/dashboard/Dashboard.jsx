@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MetricCard } from '@/components/ui/MetricCard'
 import { RiskTrendChart } from '@/components/charts/RiskTrendChart'
@@ -11,10 +12,29 @@ import { useEntityTotal } from '@/hooks/useEntities'
 import { useSTRs } from '@/hooks/useSTR'
 import { useResponsibleAiMetrics } from '@/hooks/useResponsibleAi'
 import { Spinner } from '@/components/ui/Spinner'
+import { useQueryClient } from '@tanstack/react-query'
+import { apiClient } from '@/api/client'
+import { toast } from '@/store/toastStore'
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [resetting, setResetting] = useState(false)
   const { data: alerts, isLoading: alertsLoading } = useAlerts()
+
+  const handleReset = async () => {
+    if (!window.confirm('Reset dashboard to seeded demo state? This will clear all demo data, alerts, STRs and refill with baseline patterns.')) return
+    setResetting(true)
+    try {
+      await apiClient.post('/webhooks/demo/reset')
+      await queryClient.invalidateQueries()
+      toast.success('Dashboard reset to demo state')
+    } catch {
+      toast.error('Reset failed — check backend logs')
+    } finally {
+      setResetting(false)
+    }
+  }
   const { data: entityTotal, isLoading: entityLoading } = useEntityTotal()
   const { data: strs } = useSTRs()
   const { data: aiMetrics } = useResponsibleAiMetrics()
@@ -45,12 +65,21 @@ export default function Dashboard() {
         title="Dashboard"
         subtitle="Compliance overview · Live"
         actions={
-          <button
-            onClick={() => navigate('/graph')}
-            className="px-4 py-2 text-sm bg-[#00D4AA]/10 border border-[#00D4AA]/30 text-[#00D4AA] rounded-md hover:bg-[#00D4AA]/20 transition-colors font-medium"
-          >
-            Open Graph Explorer →
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              disabled={resetting}
+              className="px-3 py-2 text-sm bg-[#1C2333] border border-[#2D3748] text-[#94A3B8] rounded-md hover:border-red-500/40 hover:text-red-400 transition-colors font-medium disabled:opacity-50"
+            >
+              {resetting ? 'Resetting…' : 'Reset Demo'}
+            </button>
+            <button
+              onClick={() => navigate('/graph')}
+              className="px-4 py-2 text-sm bg-[#00D4AA]/10 border border-[#00D4AA]/30 text-[#00D4AA] rounded-md hover:bg-[#00D4AA]/20 transition-colors font-medium"
+            >
+              Open Graph Explorer →
+            </button>
+          </div>
         }
       />
 
