@@ -163,8 +163,11 @@ def _risk_score(base: Decimal, bump: Decimal) -> Decimal:
 
 
 def _detect_pos_cash_out_ring(db: Session, ctx: DetectionContext) -> int:
+    cutoff = ctx.now - timedelta(hours=72)
+    recent = [tx for tx in ctx.transactions if _ensure_utc(tx.occurred_at) >= cutoff]
+
     by_beneficiary: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
-    for tx in ctx.transactions:
+    for tx in recent:
         by_beneficiary[tx.destination_entity_id].append(tx)
 
     existing = _existing_fingerprints(db, PatternType.pos_cash_out_ring)
@@ -312,9 +315,13 @@ def _detect_layered_transfer_chain(db: Session, ctx: DetectionContext) -> int:
     existing = _existing_fingerprints(db, PatternType.layered_transfer_chain)
     created = 0
 
+    end_time = ctx.now
+    window_start = end_time - timedelta(hours=48)
+    windowed = [tx for tx in ctx.transactions if window_start <= _ensure_utc(tx.occurred_at) <= end_time]
+
     outbound: dict[uuid.UUID, list[Transaction]] = defaultdict(list)
     all_receivers: set[uuid.UUID] = set()
-    for tx in ctx.transactions:
+    for tx in windowed:
         outbound[tx.source_entity_id].append(tx)
         all_receivers.add(tx.destination_entity_id)
 
