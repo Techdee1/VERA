@@ -92,6 +92,43 @@ async def squad_webhook(verification_data: tuple = Depends(verify_multi_merchant
         return {"status": "error", "message": "Payload processing failed — logged internally"}
 
 
+@router.post("/demo/reset", status_code=200)
+async def demo_reset():
+    """Wipe all demo data from Postgres, Neo4j and Redis — returns to a clean slate."""
+    from sqlalchemy import text
+    from app.core.neo4j_client import neo4j_driver
+    from app.core.redis_client import redis_client as _redis
+
+    results = {}
+
+    # 1. Postgres — raw SQL bypasses the ORM immutability listener on audit_log
+    db_factory = get_session_factory()
+    with db_factory() as db:
+        db.execute(text(
+            "TRUNCATE TABLE str_drafts, audit_log, alerts, transactions, ingest_jobs, entities CASCADE"
+        ))
+        db.commit()
+    results["postgres"] = "cleared"
+
+    # 2. Neo4j — delete all nodes and relationships
+    try:
+        with neo4j_driver.session() as session:
+            session.run("MATCH (n) DETACH DELETE n")
+        results["neo4j"] = "cleared"
+    except Exception as e:
+        results["neo4j"] = f"error: {e}"
+
+    # 3. Redis — remove the ingest queue and any lingering detection lock
+    try:
+        _redis.delete("ingest:jobs:queue", "detection:lock")
+        results["redis"] = "cleared"
+    except Exception as e:
+        results["redis"] = f"error: {e}"
+
+    logger.info("Demo reset completed: %s", results)
+    return {"status": "ok", "cleared": results}
+
+
 @router.post("/squad/chain-step", status_code=200)
 async def squad_chain_step(request: Request):
     """Called by the frontend after each Squad onSuccess — advances the fraud chain by one hop.
