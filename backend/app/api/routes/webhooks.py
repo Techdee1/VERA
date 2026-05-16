@@ -92,6 +92,22 @@ async def squad_webhook(verification_data: tuple = Depends(verify_multi_merchant
         return {"status": "error", "message": "Payload processing failed — logged internally"}
 
 
+@router.post("/squad/chain-step", status_code=200)
+async def squad_chain_step(request: Request):
+    """Called by the frontend after each Squad onSuccess — advances the fraud chain by one hop.
+    No HMAC required; this is an internal call from VERA's own frontend."""
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    merchant_name = str(body.get("merchant_name", ""))
+    amount_naira = Decimal(str(body.get("amount_naira", 100000)))
+    if not merchant_name:
+        return {"status": "error", "message": "merchant_name required"}
+    asyncio.create_task(_write_chain_hop(merchant_name, amount_naira))
+    return {"status": "queued", "merchant": merchant_name}
+
+
 @router.post("/squad/simulate", status_code=200)
 async def squad_webhook_simulate():
     """Demo: inject a 3-hop layered transfer chain for judge presentations — no Squad HMAC required."""
@@ -164,38 +180,50 @@ async def process_squad_webhook(payload: Dict[str, Any]):
             create_ingest_job(db=db, payload=ingest_item)
             # create_ingest_job commits internally; session stays open
 
-            # Synthetic chain hop — advances the layered transfer chain one step per payment.
-            # Payment 1 (Alpha Remit)  → writes Alpha Remit  → Quick Cash   (1 hop)
-            # Payment 2 (Quick Cash)   → writes Quick Cash   → Shell Co     (2 hops)
-            # Payment 3 (Shell Co)     → writes Shell Co     → Musa Lawal   (3 hops → alert fires)
-            # Payment 4 (Musa Lawal)   → terminal, no hop written
-            try:
-                chain_idx = MERCHANT_CHAIN_ORDER.index(merchant_name)
-            except ValueError:
-                chain_idx = -1
-
-            if 0 <= chain_idx < len(MERCHANT_CHAIN_ORDER) - 1:
-                next_name = MERCHANT_CHAIN_ORDER[chain_idx + 1]
-                this_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[merchant_name], merchant_name)
-                next_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[next_name], next_name)
-                chain_tx = Transaction(
-                    source_entity_id=this_chain.id,
-                    destination_entity_id=next_chain.id,
-                    amount=_parse_amount(data),
-                    currency="NGN",
-                    occurred_at=datetime.now(timezone.utc),
-                    reference=f"CHAIN-{chain_idx + 1}-{uuid4().hex[:8].upper()}",
-                    channel="squad_chain",
-                    metadata_json={"chain_step": chain_idx + 1, "merchant": merchant_name},
-                )
-                db.add(chain_tx)
-                db.flush()
-                run_heuristic_detection(db)
-                db.commit()
-                logger.info(f"Chain hop {chain_idx + 1}: {merchant_name} → {next_name}")
+            # Kick off the synthetic chain hop as a separate background task so it
+            # gets its own DB session (create_ingest_job already committed above)
+            asyncio.create_task(_write_chain_hop(merchant_name, _parse_amount(data)))
 
         except Exception as e:
             logger.error(f"Background processing failure: {e}", exc_info=True)
+            db.rollback()
+
+
+async def _write_chain_hop(merchant_name: str, amount: Decimal):
+    """Write one synthetic layering hop and immediately run detection.
+    Shared by both the Squad webhook path and the /chain-step frontend path."""
+    try:
+        chain_idx = MERCHANT_CHAIN_ORDER.index(merchant_name)
+    except ValueError:
+        logger.warning(f"_write_chain_hop: {merchant_name!r} not in chain — skipping")
+        return
+
+    if chain_idx >= len(MERCHANT_CHAIN_ORDER) - 1:
+        return  # terminal merchant (Musa Lawal) — no hop needed
+
+    next_name = MERCHANT_CHAIN_ORDER[chain_idx + 1]
+    db_factory = get_session_factory()
+    with db_factory() as db:
+        try:
+            this_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[merchant_name], merchant_name)
+            next_chain = _get_or_create_entity(db, CHAIN_ENTITY_IDS[next_name], next_name)
+            chain_tx = Transaction(
+                source_entity_id=this_chain.id,
+                destination_entity_id=next_chain.id,
+                amount=amount if amount > 0 else Decimal("100000"),
+                currency="NGN",
+                occurred_at=datetime.now(timezone.utc),
+                reference=f"CHAIN-{chain_idx + 1}-{uuid4().hex[:8].upper()}",
+                channel="squad_chain",
+                metadata_json={"chain_step": chain_idx + 1, "merchant": merchant_name},
+            )
+            db.add(chain_tx)
+            db.flush()
+            run_heuristic_detection(db)
+            db.commit()
+            logger.info(f"Chain hop {chain_idx + 1}: {merchant_name} → {next_name}")
+        except Exception as e:
+            logger.error(f"Chain hop failed for {merchant_name}: {e}", exc_info=True)
             db.rollback()
 
 

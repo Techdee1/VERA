@@ -6,6 +6,7 @@ import { alertsApi } from '@/api/alerts'
 import { graphApi } from '@/api/graph'
 import { transactionsApi } from '@/api/transactions'
 import { entitiesApi } from '@/api/entities'
+import { webhooksApi } from '@/api/webhooks'
 import { cn } from '@/utils/cn'
 
 // ─── constants ────────────────────────────────────────────────────────────────
@@ -446,6 +447,8 @@ export function SquadLiveTrigger() {
       try {
         // Wait for the judge to complete this Squad payment
         await openModal(payment)
+        // Tell backend to advance the fraud chain by one hop — don't wait for Squad webhooks
+        webhooksApi.chainStep({ merchant_name: payment.name, amount_naira: payment.amount }).catch(() => {})
       } catch {
         // Cancelled or error — stop the whole chain
         setRunning(false)
